@@ -6,12 +6,15 @@ on:
 jobs:
   check-for-updates:
     runs-on: ubuntu-latest
+    outputs:
+      update: ${{steps.check-for-updates.update_step.updatesAvailable}}
 
     steps:
     - uses: actions/checkout@v1
 
     # call the script and store the result
     - run: updatesAvailable=$((pwsh -Command "& { .\updater.ps1 }") | tail -1) 
+    
     - id: update_step
       run: echo "::set-output name=updatesAvailable::$updatesAvailable"
 
