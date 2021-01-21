@@ -10,4 +10,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - run: pwsh .\updater.ps1
+    - run: pwsh updater.ps1
