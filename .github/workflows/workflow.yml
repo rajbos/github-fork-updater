@@ -1,0 +1,13 @@
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  check-for-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - run: pwsh .\updater.ps1
