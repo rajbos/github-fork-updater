@@ -12,4 +12,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - run: pwsh updater.ps1
+    - run: $updatesAvailable = pwsh updater.ps1
+    - id: update_step
+      run: echo "::set-output name=updatesAvailable::$updatesAvailable"
+
+  run-update:
+    runs-on: ubuntu-latest
+    needs: check-for-updates
+    steps:
+    - run: echo 'hello world'
+    - run: echo "${{ jobs.check-for-updates.steps.update_step.outputs.updatesAvailable }}"
