@@ -1,0 +1,13 @@
+on: 
+  label:
+    types: [created]
+
+jobs:
+  update-fork:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'confirmed'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: echo "hello world"
