@@ -1,6 +1,6 @@
 on: 
-  label:
-    types: [created, edited]
+  issues:
+    types: [labeled]
 
 jobs:
   update-fork:
