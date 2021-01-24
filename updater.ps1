@@ -116,7 +116,7 @@ function FindRepoOrigin {
     $compareUrl = "https://github.com/$($info.full_name)/compare/$defaultBranch..$($info.parent.owner.login):$defaultBranch"
     Write-Host "You can compare the default branches using this link: $compareUrl"
 
-    return @{
+    return [PSCustomObject]@{
         parentUrl = $info.parent.html_url
         defaultBranch = $defaultBranch
         lastPushRepo = $info.pushed_at
@@ -156,7 +156,7 @@ function CheckAllReposInOrg {
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
 
     # create hastable
-    $reposWithUpdates = @() | Out-Null
+    $reposWithUpdates = @()
 
     foreach ($repo in $repos) {
         # add empty line for logs readability
@@ -167,13 +167,13 @@ function CheckAllReposInOrg {
             if ($repoInfo.updateAvailable) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
 
-                $repo = ${
+                $repoData = [PSCustomObject]@{
                     repoName = $repo.full_name
                     parentUrl = $repoInfo.parentUrl
                     compareUrl = $repoInfo.compareUrl
                 }
 
-                $reposWithUpdates += $repo
+                $reposWithUpdates += $repoData
             } 
             else {
                 Write-Host "No updates available from parent"
@@ -189,6 +189,6 @@ function CheckAllReposInOrg {
 }
 
 # uncomment to test locally
-#$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
+# $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
 
 CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
