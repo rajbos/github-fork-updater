@@ -90,7 +90,7 @@ function FindRepoOrigin {
 
     # build the compare url
     $compareUrl = "https://github.com/$($info.full_name)/compare/$defaultBranch..$($info.parent.owner.login):$defaultBranch"
-    Write-Host "You can compare the default branches using this link: [ $compareUrl ]"
+    Write-Host "You can compare the default branches using this link: $compareUrl"
 
     return @{
         parentUrl = $info.parent.html_url
