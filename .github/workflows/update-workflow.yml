@@ -15,5 +15,5 @@ jobs:
     - run: echo "Found the issue title [${{ github.event.issue.title }}]"
 
     - run: |
-       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} $issueTitle "${{ github.event.issue.title }}
+       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} $issueTitle "${{ github.event.issue.title }}"
       shell: pwsh
