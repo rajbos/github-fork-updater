@@ -153,14 +153,14 @@ function CheckAllReposInOrg {
 
     Write-Host "Running a check on all repositories inside of organization [$orgName] with user [$userName] and a PAT that has length [$($PAT.Length)]"
 
-
-
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
 
     # create hastable
-    $reposWithUpdates = @()
+    $reposWithUpdates = @() | Out-Null
 
     foreach ($repo in $repos) {
+        # add empty line for logs readability
+        Write-Host ""
         if ($repo.fork) {
             Write-Host "Checking repository [$($repo.full_name)]"
             $repoInfo = FindRepoOrigin -repoUrl $repo.url
@@ -189,6 +189,6 @@ function CheckAllReposInOrg {
 }
 
 # uncomment to test locally
-$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
+#$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
 
 CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
