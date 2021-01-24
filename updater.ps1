@@ -3,7 +3,8 @@
 param (
     [string] $orgName,
     [string] $userName,
-    [string] $PAT
+    [string] $PAT,
+    [string] $issuesRepository
 )
 
 # example parameters:
@@ -39,16 +40,19 @@ function CallWebRequest {
     param (
         [string] $url,
         [string] $userName,
-        [string] $PAT
+        [string] $PAT,
+        [string] $verbToUse = "Get",
+        [object] $body
     )
 
     $Headers = Get-Headers -userName $userName -PAT $PAT
 
     try {
-        $result = Invoke-WebRequest -Uri $url -Headers $Headers -ErrorAction Stop    
+
+        $bodyContent = ($body | ConvertTo-Json) -replace '\\', '\'
+        $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method $verbToUse -Body $bodyContent -ErrorAction Stop
         
         Write-Host "  StatusCode: $($result.StatusCode)"
-        Write-Host $result.Headers.GetType()
         Write-Host "  RateLimit-Limit: $($result.Headers["X-RateLimit-Limit"])"
         Write-Host "  RateLimit-Remaining: $($result.Headers["X-RateLimit-Remaining"])"
         Write-Host "  RateLimit-Reset: $($result.Headers["X-RateLimit-Reset"])"
@@ -165,7 +169,8 @@ function CheckAllReposInOrg {
     param (
         [string] $orgName,
         [string] $userName,
-        [string] $PAT
+        [string] $PAT,
+        [string] $issuesRepository
     )
 
     Write-Host "Running a check on all repositories inside of organization [$orgName] with user [$userName] and a PAT that has length [$($PAT.Length)]"
@@ -178,7 +183,7 @@ function CheckAllReposInOrg {
     foreach ($repo in $repos) {
         # add empty line for logs readability
         Write-Host ""
-        if ($repo.fork) {
+        if ($repo.fork -and !$repo.archived -and !$repo.disabled) {
             Write-Host "Checking repository [$($repo.full_name)]"
             $repoInfo = FindRepoOrigin -repoUrl $repo.url
             if ($repoInfo.updateAvailable) {
@@ -197,7 +202,7 @@ function CheckAllReposInOrg {
             }
         }
         else {
-            Write-Host "Skipping repository [$($repo.full_name)] since it is not a fork"
+            Write-Host "Skipping repository [$($repo.full_name)] since it is not a fork or has been archived or is disabled"
         }
     }
 
@@ -205,23 +210,73 @@ function CheckAllReposInOrg {
     return $reposWithUpdates
 }
 
-function CreateIssueFor { 
+function CreateNewIssueForRepo { 
     param (
-        [Object] $repoInfo 
+        [Object] $repoInfo,
+        [string] $issuesRepositoryName,
+        [string] $title,
+        [string] $body,
+        [string] $PAT,
+        [string] $userName
     )
 
-    Write-Host "- repoName $($repoInfo.fullName)"
-    Write-Host "- parentUrl $($repoInfo.parentUrl)"
-    Write-Host "- compareUrl $($repoInfo.compareUrl)"
+    $url = "https://api.github.com/repos/$issuesRepositoryName/issues"
+
+    $data = [PSCustomObject]@{
+        title = $title
+        body = $body
+    }
+
+    Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
+    $result = CallWebRequest -url $url -verbToUse "POST" -body $data -PAT $PAT -userName $userName
+
+    Write-Host "Issue has been created and can be found at this url: ($($result.html_url))"
+}
+
+function CreateIssueFor { 
+    param (
+        [object] $repoInfo,
+        [string] $issuesRepositoryName,
+        [object] $existingIssues,
+        [string] $PAT,
+        [string] $userName
+    )
+
+    #Write-Host "- repoName $($repoInfo.repoName)"
+    #Write-Host "- parentUrl $($repoInfo.parentUrl)"
+    #Write-Host "- compareUrl $($repoInfo.compareUrl)"
+
+    $issueTitle = "Parent repository for [$($repoInfo.repoName)] has updates available"
+    $existingIssueForRepo = $existingIssues | Where-Object {$_.title -eq $issueTitle}
+
+    if ($null -eq $existingIssueForRepo) {
+        $body = "The parent repository for **$($repoInfo.repoName)** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork"
+        CreateNewIssueForRepo -repoInfo $repo -issuesRepositoryName $issuesRepository -title $issueTitle -body $body -PAT $PAT -userName $userName
+    } 
+    else {
+        # the issue already exists. Doesn't make sense to update the existing issue
+        # If we need to, we can send in a PATCH to the same url while adding an 'issue_number' parameter to the body
+        Write-Host "Issue with title [$issueTitle] already exists"
+    }
 }
 
 function CreateIssuesForReposWithUpdates {
     param(
-         [object] $reposWithUpdates
+         [object] $reposWithUpdates,
+         [string] $issuesRepository,
+         [string] $PAT,
+         [string] $userName
     )
 
+    # load existing issues in the issues repo    
+    # https://api.github.com/repos/{owner}/{repo}/issues
+    $url = "https://api.github.com/repos/$issuesRepository/issues"
+    $existingIssues = CallWebRequest -url $url -userName $userName -PAT $PAT
+
+    Write-Host "Found $($existingIssues.Count) existing issues in issues repository [$issuesRepository]"
+
     foreach ($repo in $reposWithUpdates) {        
-        CreateIssueFor -repoInfo $repo
+        CreateIssueFor -repoInfo $repo -issuesRepository $issuesRepository -existingIssues $existingIssues -PAT $PAT -userName $userName
     }
 }
 
@@ -229,25 +284,28 @@ function TestLocally {
     param (
         [string] $orgName,
         [string] $userName,
-        [string] $PAT
+        [string] $PAT,
+        [string] $issuesRepository
     )
 
     #$env:reposWithUpdates = $null
     # load the repos with updates if we don't have them available yet
     if($null -eq $env:reposWithUpdates) {
-        $env:reposWithUpdates = (CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT) | ConvertTo-Json
+        $env:reposWithUpdates = (CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository) | ConvertTo-Json
     }
 
-    CreateIssuesForReposWithUpdates ($env:reposWithUpdates | ConvertFrom-Json)
+    if ($env:reposWithUpdates.Count -gt 0) {
+        CreateIssuesForReposWithUpdates ($env:reposWithUpdates | ConvertFrom-Json) -issuesRepository $issuesRepository -userName $userName -PAT $PAT
+    }
 }
 
 # uncomment to test locally
- $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true
+$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true; $issuesRepository = "rajbos/github-fork-updater"
 
 if ($testingLocally) {
-    TestLocally -orgName $orgName -userName $userName -PAT $PAT
+    TestLocally -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository
 }
 else {
     # production flow:
-    CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
+    CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository
 }
