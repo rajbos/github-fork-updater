@@ -185,7 +185,7 @@ function CheckAllReposInOrg {
     }
 
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
-    return ($reposWithUpdates.Count -gt 0)
+    return $reposWithUpdates
 }
 
 # uncomment to test locally
