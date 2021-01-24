@@ -312,4 +312,6 @@ else {
     if ($reposWithUpdates.Count -gt 0) {
         CreateIssuesForReposWithUpdates $reposWithUpdates -issuesRepository $issuesRepository -userName $userName -PAT $PAT
     }
+
+    return $reposWithUpdates
 }

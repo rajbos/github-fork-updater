@@ -17,6 +17,10 @@ jobs:
       shell: pwsh
       name: Check for updates
       run: | 
-        $reposWithUpdates = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} -issuesRepository ${{ github.repository }} )[-1]
-        Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
-        echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
+        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} -issuesRepository ${{ github.repository }} )
+        
+        if ($null -ne $updateResult) {
+          $reposWithUpdates = $updateResult[-1]
+          Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
+          echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
+        }
