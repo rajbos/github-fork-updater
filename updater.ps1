@@ -300,12 +300,16 @@ function TestLocally {
 }
 
 # uncomment to test locally
-$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true; $issuesRepository = "rajbos/github-fork-updater"
+# $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true; $issuesRepository = "rajbos/github-fork-updater"
 
 if ($testingLocally) {
     TestLocally -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository
 }
 else {
     # production flow:
-    CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository
+    $reposWithUpdates = CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository
+
+    if ($reposWithUpdates.Count -gt 0) {
+        CreateIssuesForReposWithUpdates $reposWithUpdates -issuesRepository $issuesRepository -userName $userName -PAT $PAT
+    }
 }

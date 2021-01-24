@@ -20,22 +20,3 @@ jobs:
         $reposWithUpdates = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} -issuesRepository ${{ github.repository }} )[-1]
         Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
         echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
-
-  run-update:
-    runs-on: ubuntu-latest
-    needs: check-for-updates
-    environment: UpdateTheFork
-    if: ${{ needs.check-for-updates.outputs.update == 'True' }} 
-    steps:
-    - uses: actions/checkout@v2
-    
-    - run: echo "There are updates available and we need to update the fork"
-    
-    - uses: JasonEtco/create-an-issue@v2
-      id: create-issue
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        update_existing: true
-
-    - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }} with url ${{ steps.create-issue.outputs.url }}'
