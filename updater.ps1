@@ -126,6 +126,8 @@ function CheckAllReposInOrg {
         [string] $userName,
         [string] $PAT
     )
+
+    Write-Host "Running a check on all repositories inside of organization [$orgName] with user [$userName] and a PAT that has length [$($PAT.Length)]"
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
 
     # create hastable
