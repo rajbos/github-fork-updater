@@ -42,6 +42,7 @@ function UpdateFork {
     cd source
     git clone $forkUrl .
 
+    ls
     # add remote to the parent
 
     # pull the parent
@@ -57,4 +58,4 @@ UpdateFork -fork $fork -PAT $PAT
 
 Write-Host "Cleaning up"
 cd ..
-del source --force
+Remove-Item -Force -Recurse source
