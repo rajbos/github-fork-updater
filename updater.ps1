@@ -1,7 +1,16 @@
+# example calls:
+# .\updater.ps1 -orgName "rajbos-actions" -userName "xxx" -PAT $env:GitHubPAT
+param (
+    [string] $orgName,
+    [string] $userName,
+    [string] $PAT
+)
+
 # example parameters:
 #$repoUrl = "https://api.github.com/repos/rajbos-actions/test-repo"
 #$orgName = "rajbos-actions"
 
+# placeholder for caching headers
 $CentralHeaders
 function Get-Headers {
     param (        
@@ -147,7 +156,7 @@ function CheckAllReposInOrg {
     }
 
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
+    return ($reposWithUpdates.Count -gt 0)
 }
 
-# example calls:
-# CheckAllReposInOrg -orgName "rajbos-actions" -userName "xxx" -PAT $env:GitHubPAT
+CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
