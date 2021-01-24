@@ -18,9 +18,8 @@ jobs:
       name: Check for updates
       run: | 
         $reposWithUpdates = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }})[-1]
-        Write-Host "Are there any updates available? [$reposWithUpdates]"
+        Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
         echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
-
 
   run-update:
     runs-on: ubuntu-latest

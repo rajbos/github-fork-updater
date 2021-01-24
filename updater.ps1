@@ -12,6 +12,8 @@ param (
 
 # placeholder for caching headers
 $CentralHeaders
+# placeholder to enable testing locally
+$testingLocally = $false
 function Get-Headers {
     param (        
         [string] $userName,
@@ -40,13 +42,28 @@ function CallWebRequest {
         [string] $PAT
     )
 
-    $Headers = Get-Headers
+    $Headers = Get-Headers -userName $userName -PAT $PAT
 
     try {
-        $result = Invoke-WebRequest -Uri $url -Headers $Headers       
+        $result = Invoke-WebRequest -Uri $url -Headers $Headers -ErrorAction Stop    
+        
+        Write-Host "  StatusCode: $($result.StatusCode)"
+        Write-Host $result.Headers.GetType()
+        Write-Host "  RateLimit-Limit: $($result.Headers["X-RateLimit-Limit"])"
+        Write-Host "  RateLimit-Remaining: $($result.Headers["X-RateLimit-Remaining"])"
+        Write-Host "  RateLimit-Reset: $($result.Headers["X-RateLimit-Reset"])"
+        Write-Host "  RateLimit-Used: $($result.Headers["x-ratelimit-used"])"
+        # convert the response json content
         $info = ($result.Content | ConvertFrom-Json)
     }
     catch {
+        Write-Host "Error calling api at [$url]:"
+        Write-Host "  StatusCode: $($_.Exception.Response.StatusCode)"
+        Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
+        Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
+        Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
+        Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
+
         $messageData = $_.ErrorDetails.Message | ConvertFrom-Json
         Write-Host "$($_.ErrorDetails.Message)"
         if ($messageData.message.StartsWith("API rate limit exceeded")) {
@@ -188,7 +205,49 @@ function CheckAllReposInOrg {
     return $reposWithUpdates
 }
 
-# uncomment to test locally
-# $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
+function CreateIssueFor { 
+    param (
+        [Object] $repoInfo 
+    )
 
-CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
+    Write-Host "- repoName $($repoInfo.fullName)"
+    Write-Host "- parentUrl $($repoInfo.parentUrl)"
+    Write-Host "- compareUrl $($repoInfo.compareUrl)"
+}
+
+function CreateIssuesForReposWithUpdates {
+    param(
+         [object] $reposWithUpdates
+    )
+
+    foreach ($repo in $reposWithUpdates) {        
+        CreateIssueFor -repoInfo $repo
+    }
+}
+
+function TestLocally {
+    param (
+        [string] $orgName,
+        [string] $userName,
+        [string] $PAT
+    )
+
+    #$env:reposWithUpdates = $null
+    # load the repos with updates if we don't have them available yet
+    if($null -eq $env:reposWithUpdates) {
+        $env:reposWithUpdates = (CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT) | ConvertTo-Json
+    }
+
+    CreateIssuesForReposWithUpdates ($env:reposWithUpdates | ConvertFrom-Json)
+}
+
+# uncomment to test locally
+ $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true
+
+if ($testingLocally) {
+    TestLocally -orgName $orgName -userName $userName -PAT $PAT
+}
+else {
+    # production flow:
+    CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
+}
