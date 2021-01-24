@@ -101,12 +101,12 @@ function FindRepoOrigin {
         throw
     }
 
-    Write-Host "INFO: Forks default branch = [$($info.parent.default_branch)] [$($info.parent.branches_url)] with last push [$($info.pushed_at)]"
+    Write-Host "Forks default branch = [$($info.parent.default_branch)] [$($info.parent.branches_url)] with last push [$($info.pushed_at)]"
     Write-Host "Found parent [$($info.parent.html_url)] of repo [$repoUrl], last push was on [$($info.parent.pushed_at)]"
 
     $defaultBranch = $info.parent.default_branch
     $parentDefaultBranchUrl = $info.parent.branches_url -replace "{/branch}", "/$($defaultBranch)"
-    Write-Host "INFO: Branches url for default branch: " $parentDefaultBranchUrl
+    Write-Host "Branches url for default branch: " $parentDefaultBranchUrl
 
     if ($info.pushed_at -lt $info.parent.pushed_at) {
         Write-Host "There are new updates on the parent available"
