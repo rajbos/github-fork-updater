@@ -42,8 +42,25 @@ function CallWebRequest {
 
     $Headers = Get-Headers
 
-    $result = Invoke-WebRequest -Uri $url -Headers $Headers       
-    $info = ($result.Content | ConvertFrom-Json)
+    try {
+        $result = Invoke-WebRequest -Uri $url -Headers $Headers       
+        $info = ($result.Content | ConvertFrom-Json)
+    }
+    catch {
+        $messageData = $_.ErrorDetails.Message | ConvertFrom-Json
+        Write-Host "$($_.ErrorDetails.Message)"
+        if ($messageData.message.StartsWith("API rate limit exceeded")) {
+            Write-Error "Rate limit exceeded. Halting execution"
+            throw
+        }
+
+        if ($messageData.message -eq "Not Found") {
+            Write-Warning "Call to GitHub Api [$url] had [not found] result with documentation url [$($messageData.documentation_url)]"
+            return $messageData.documentation_url
+        }
+        
+        Write-Host "$messageData"
+    }
 
     return $info
 
@@ -58,6 +75,13 @@ function FindAllRepos {
 
     $url = "https://api.github.com/orgs/$orgName/repos"
     $info = CallWebRequest -url $url -userName $userName -PAT $PAT
+
+    if ($info -eq "https://docs.github.com/rest/reference/repos#list-organization-repositories") {
+        
+        Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
+        $url = "https://api.github.com/users/$orgName/repos"
+        $info = CallWebRequest -url $url -userName $userName -PAT $PAT
+    }
 
     Write-Host "Found [$($info.Count)] repositories in [$orgName]"
     return $info
@@ -128,6 +152,9 @@ function CheckAllReposInOrg {
     )
 
     Write-Host "Running a check on all repositories inside of organization [$orgName] with user [$userName] and a PAT that has length [$($PAT.Length)]"
+
+
+
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
 
     # create hastable
@@ -160,5 +187,8 @@ function CheckAllReposInOrg {
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
     return ($reposWithUpdates.Count -gt 0)
 }
+
+# uncomment to test locally
+$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT;
 
 CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT
