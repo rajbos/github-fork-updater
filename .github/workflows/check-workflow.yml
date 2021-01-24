@@ -17,7 +17,10 @@ jobs:
       shell: pwsh
       name: Check for updates
       run: | 
-        $updatesAvailable = .\updater.ps1
+        # pull in the code from the script
+        .\updater.ps1
+        # execute the right method
+        $updatesAvailable = CheckAllReposInOrg -orgName {{ secrets.OrganizationName }} -userName "xxx" -PAT {{ secrets.GITHUB_TOKEN }}
         Write-Host "are there any updates available? [$updatesAvailable]"
         echo "::set-output name=update::$updatesAvailable"
 
