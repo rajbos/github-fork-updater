@@ -78,6 +78,6 @@ function Main {
 }
 
 # uncomment for local testing
-$issueTitle = "Parent repository for [rajbos/tweetinvi] has updates available"; $PAT=$env:GitHubPAT
+#$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT
 
 Main
