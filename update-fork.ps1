@@ -36,6 +36,8 @@ function UpdateFork {
     )
 
     $forkUrl = GetForkCloneUrl -fork $fork -PAT $PAT
+
+    # create new temp dir to hold the fork
     New-Item -ItemType Directory $sourceDirectory
     Set-Location $sourceDirectory
     git clone $forkUrl .
@@ -57,7 +59,7 @@ function UpdateFork {
     git checkout $parent.parentDefaultBranch
 
     # merge in any changes from the branch
-    git merge github/$parent.parentDefaultBranch
+    git merge github/$($parent.parentDefaultBranch)
 
     # push the changes back to your repo
     Write-Host "Pushing changes back to fork"
@@ -76,4 +78,6 @@ function Main {
 }
 
 # uncomment for local testing
-$issueTitle = "Parent repository for [rajbos/azure-docs] has updates available"; $PAT=$env:GitHubPAT
+$issueTitle = "Parent repository for [rajbos/tweetinvi] has updates available"; $PAT=$env:GitHubPAT
+
+Main
