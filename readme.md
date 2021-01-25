@@ -14,6 +14,8 @@ The check-workflow will iterate all repositories in the same organization (or us
 Note: This workflow can be triggered manually or will run on a schedule.
 
 # update-workflow.yml
-After reviewing the changes in the parent repository, you can decide to pull in those changes into your own fork. Adding the label `update-fork` on the issues created from the `check-workflow` workflow will trigger the `update-workflow` to pull in those changes, comment that it has been updated on the issue and then close the issue.
+After reviewing the changes in the parent repository, you can decide to pull in those changes into your own fork. Adding the label `update-fork` on the issues created from the `check-workflow` workflow will trigger the `update-workflow` to pull in those changes.
+
+In a future update, the issue will receive a comment that it has been updated on the issue and then close the issue.
 
 Note: currently only the `default branch` will be updated.

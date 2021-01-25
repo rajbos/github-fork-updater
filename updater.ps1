@@ -180,7 +180,7 @@ function CreateIssueFor {
     $existingIssueForRepo = $existingIssues | Where-Object {$_.title -eq $issueTitle}
 
     if ($null -eq $existingIssueForRepo) {
-        $body = "The parent repository for **$($repoInfo.repoName)** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork"
+        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork automatically."
         CreateNewIssueForRepo -repoInfo $repo -issuesRepositoryName $issuesRepository -title $issueTitle -body $body -PAT $PAT -userName $userName
     } 
     else {
