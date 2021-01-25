@@ -3,7 +3,7 @@ on:
     branches:
       - main 
   schedule:
-    - 7 0 * * 1-5
+    - cron: 7 0 * * 1-5
   workflow_dispatch:
 
 jobs:
