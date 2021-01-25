@@ -1,4 +1,27 @@
 
+# placeholder for caching headers
+$CentralHeaders
+function Get-Headers {
+    param (        
+        [string] $userName,
+        [string] $PAT
+    )
+
+    if ($null -ne $CentralHeaders) {
+        return $CentralHeaders
+    }
+
+    $pair = "$($userName):$($PAT)"
+    $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
+    $basicAuthValue = "Basic $encodedCreds"
+
+    $CentralHeaders = @{
+        Authorization = $basicAuthValue
+    }
+
+    return $CentralHeaders
+}
+
 function CallWebRequest {
     param (
         [string] $url,
