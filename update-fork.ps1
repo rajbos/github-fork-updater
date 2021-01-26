@@ -72,13 +72,13 @@ function Main {
         [string] $issueTitle,
         [string] $PAT,
         [int] $issueId,
-        [string] $repoName
+        [string] $issuesRepository
     )
 
-    Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$repoName] and a PAT that has length [$($PAT.Length)]"
+    Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$issuesRepository] and a PAT that has length [$($PAT.Length)]"
 
     $fork = ParseIssueTitle -issueTitle $issueTitle
-    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository" -repoName $repoName -PAT $PAT
+    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository" -repoName $issuesRepository -PAT $PAT
     UpdateFork -fork $fork -PAT $PAT
 
     Write-Host "Cleaning up"
@@ -88,11 +88,11 @@ function Main {
     # make sure we are back where we started (for easier local testing)
     Set-Location $PSScriptRoot
 
-    AddCommentToIssue -number $issueId -message "Fork has been updated" -repoName $repoName -PAT $PAT
-    CloseIssue -number $issueId -issuesRepositoryName $repoName -PAT $PAT
+    AddCommentToIssue -number $issueId -message "Fork has been updated" -repoName $issuesRepository -PAT $PAT
+    CloseIssue -number $issueId -issuesRepositoryName $issuesRepository -PAT $PAT
 }
 
 # uncomment for local testing
 #$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT; $repoName = "rajbos/github-fork-updater"; $issueId = 24
 
-Main -issueTitle $issueTitle -PAT $PAT -issueId $issueId -repoName $repoName
+Main -issueTitle $issueTitle -PAT $PAT -issueId $issueId -issuesRepository $issuesRepository
