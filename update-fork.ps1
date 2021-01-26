@@ -68,6 +68,15 @@ function UpdateFork {
 }
 
 function Main {
+    param (
+        [string] $issueTitle,
+        [string] $PAT,
+        [int] $issueId,
+        [string] $repoName
+    )
+
+    Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$repoName] and a PAT that has length [$($PAT.Length)]"
+
     $fork = ParseIssueTitle -issueTitle $issueTitle
     AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository" -repoName $repoName -PAT $PAT
     UpdateFork -fork $fork -PAT $PAT
@@ -84,6 +93,6 @@ function Main {
 }
 
 # uncomment for local testing
-$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT; $repoName = "rajbos/github-fork-updater"; $issueId = 24
+#$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT; $repoName = "rajbos/github-fork-updater"; $issueId = 24
 
-Main
+Main -issueTitle $issueTitle -PAT $PAT -issueId $issueId -repoName $repoName
