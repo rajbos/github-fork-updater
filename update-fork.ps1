@@ -8,11 +8,13 @@ param (
     [string] $userName,
     [string] $PAT,
     [string] $issuesRepository,
-    [string] $issueTitle
+    [string] $issueTitle,
+    [int] $issueId,
+    [string] $repoName
 )
 
 # include local library code
-. .\github-calls.ps1
+. $PSScriptRoot\github-calls.ps1
 
 function ParseIssueTitle {
     param (
@@ -42,9 +44,6 @@ function UpdateFork {
     Set-Location $sourceDirectory
     git clone $forkUrl .
 
-    #temp check
-    ls
-
     $parent = GetParentInfo -fork $fork
     Write-Host "Found forks parent with url [$($parent.parentUrl)]"
 
@@ -59,7 +58,7 @@ function UpdateFork {
     git checkout $parent.parentDefaultBranch
 
     # merge in any changes from the branch
-    git merge github/$($parent.parentDefaultBranch)
+    git merge github/$($parent.parentDefaultBranch) --ff
 
     # push the changes back to your repo
     Write-Host "Pushing changes back to fork"
@@ -70,14 +69,21 @@ function UpdateFork {
 
 function Main {
     $fork = ParseIssueTitle -issueTitle $issueTitle
+    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository" -repoName $repoName -PAT $PAT
     UpdateFork -fork $fork -PAT $PAT
 
     Write-Host "Cleaning up"
     Set-Location ..
     Remove-Item -Force -Recurse $sourceDirectory
+
+    # make sure we are back where we started (for easier local testing)
+    Set-Location $PSScriptRoot
+
+    AddCommentToIssue -number $issueId -message "Fork has been updated" -repoName $repoName -PAT $PAT
+    CloseIssue -number $issueId -issuesRepositoryName $repoName -PAT $PAT
 }
 
 # uncomment for local testing
-#$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT
+$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT; $repoName = "rajbos/github-fork-updater"; $issueId = 24
 
 Main

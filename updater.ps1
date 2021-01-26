@@ -12,7 +12,7 @@ param (
 #$orgName = "rajbos-actions"
 
 # pull in central calls library
-. .\github-calls.ps1
+. $PSScriptRoot\github-calls.ps1
 
 # placeholder to enable testing locally
 $testingLocally = $false
@@ -138,29 +138,6 @@ function CheckAllReposInOrg {
 
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
     return $reposWithUpdates
-}
-
-function CreateNewIssueForRepo { 
-    param (
-        [Object] $repoInfo,
-        [string] $issuesRepositoryName,
-        [string] $title,
-        [string] $body,
-        [string] $PAT,
-        [string] $userName
-    )
-
-    $url = "https://api.github.com/repos/$issuesRepositoryName/issues"
-
-    $data = [PSCustomObject]@{
-        title = $title
-        body = $body
-    }
-
-    Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
-    $result = CallWebRequest -url $url -verbToUse "POST" -body $data -PAT $PAT -userName $userName
-
-    Write-Host "Issue has been created and can be found at this url: ($($result.html_url))"
 }
 
 function CreateIssueFor { 
