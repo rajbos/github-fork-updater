@@ -1,6 +1,12 @@
 This repository has been created to facilitate updating your forked repositories with review actions. Especially helpful when having a separate organization for all your forked GitHub Actions (as you should for security reasons).
 
 # Steps
+Watch the demo video here:  
+
+[![Watch the demo video here](https://img.youtube.com/vi/Jj033ffS1YQ/hqdefault.jpg)](https://youtu.be/Jj033ffS1YQ)
+
+
+Or follow these steps:
 1. Fork this repository to your own organization.
 1. Enable issue in the forked repository (issues are disabled on the fork by default, since you'd want any issues to be created on the parent repo, not the forked one).
 1. Enable the workflow `check-workflow.yml` and allow the schedule to run (GitHub security feature).
