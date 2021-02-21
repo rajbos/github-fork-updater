@@ -10,7 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: echo "hello world"
     - run: echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"
     - run: echo "Found the issue title [${{ github.event.issue.title }}]"
 
