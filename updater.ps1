@@ -44,7 +44,7 @@ function FindRepoOrigin {
         [string] $userName,
         [string] $PAT
     )
-
+    
     $info = CallWebRequest -url $repoUrl -userName $userName -PAT $PAT
         
     if ($false -eq $info.fork) {
@@ -59,8 +59,10 @@ function FindRepoOrigin {
     $parentDefaultBranchUrl = $info.parent.branches_url -replace "{/branch}", "/$($defaultBranch)"
     Write-Host "Branches url for default branch: " $parentDefaultBranchUrl
 
-    if ($info.pushed_at -lt $info.parent.pushed_at) {
-        Write-Host "There are new updates on the parent available"
+    $branchLastCommitDate = GetBranchInfo -PAT $PAT -parent $info.parent.full_name -branchName $defaultBranch
+
+    if ($info.pushed_at -lt $branchLastCommitDate) {
+        Write-Host "There are new updates on the parent available on the default branch [$defaultBranch], last commit date: [$branchLastCommitDate]"
     }
 
     # build the compare url
@@ -71,8 +73,8 @@ function FindRepoOrigin {
         parentUrl = $info.parent.html_url
         defaultBranch = $defaultBranch
         lastPushRepo = $info.pushed_at
-        lastPushParent = $info.parent.pushed_at
-        updateAvailable = ($info.pushed_at -lt $info.parent.pushed_at)
+        lastPushParent = $branchLastCommitDate
+        updateAvailable = ($info.pushed_at -lt $branchLastCommitDate)
         compareUrl = $compareUrl
     }
 }
@@ -115,6 +117,9 @@ function CheckAllReposInOrg {
         Write-Host ""
         if ($repo.fork -and !$repo.archived -and !$repo.disabled) {
             Write-Host "Checking repository [$($repo.full_name)]"
+            if ($repo.full_name -eq "rajbos/mutation-testing-elements") {
+                Write-Host "Break here for testing"
+            }
             $repoInfo = FindRepoOrigin -repoUrl $repo.url
             if ($repoInfo.updateAvailable) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
@@ -195,7 +200,7 @@ function TestLocally {
         [string] $issuesRepository
     )
 
-    #$env:reposWithUpdates = $null
+    $env:reposWithUpdates = $null
     # load the repos with updates if we don't have them available yet
     if($null -eq $env:reposWithUpdates) {
         $env:reposWithUpdates = (CheckAllReposInOrg -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository) | ConvertTo-Json
@@ -207,7 +212,7 @@ function TestLocally {
 }
 
 # uncomment to test locally
-# $orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true; $issuesRepository = "rajbos/github-fork-updater"
+$orgName = "rajbos"; $userName = "xxx"; $PAT = $env:GitHubPAT; $testingLocally = $true; $issuesRepository = "rajbos/github-fork-updater"
 
 if ($testingLocally) {
     TestLocally -orgName $orgName -userName $userName -PAT $PAT -issuesRepository $issuesRepository

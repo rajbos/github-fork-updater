@@ -102,6 +102,19 @@ function GetParentInfo {
 
 }
 
+function GetBranchInfo {
+    param (
+        [string] $parent,
+        [string] $PAT,
+        [string] $branchName
+    )
+
+    $repoUrl = "https://api.github.com/repos/$parent/branches/$branchName"
+    $info = CallWebRequest -url $repoUrl -userName $userName -PAT $PAT
+
+    return $info.commit.commit.author.date
+}
+
 function AddCommentToIssue {
     param (
         [string] $repoName,
