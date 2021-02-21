@@ -1,5 +1,15 @@
 This repository has been created to facilitate updating your forked repositories with review actions. Especially helpful when having a separate organization for all your forked GitHub Actions (as you should for security reasons). Read more on that topic [here](https://rajbos.github.io/blog/2021/02/06/GitHub-Actions-Forking-Repositories).
 
+Process:
+* Fork this repository to the organization / account you want to update your forks in.
+* Configure it using the steps below.
+* On a schedule, the workflow will run checking all the repositories in the organization / account
+* If the repository is a fork, it will be checked for incoming updates
+* If there are updates, an issue in the `GitHubForkUpdater` repository will be created.
+* Validate the incoming changes using the link in the issue
+* If you add the label `update-fork` to the issue, your fork will be updated
+* And the issue will be closed
+
 # Steps
 Watch the demo video here:  
 
