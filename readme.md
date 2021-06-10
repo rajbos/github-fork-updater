@@ -1,4 +1,4 @@
-This repository has been created to facilitate updating your forked repositories with review actions. Especially helpful when having a separate organization for all your forked GitHub Actions (as you should for security reasons). Read more on that topic [here](https://rajbos.github.io/blog/2021/02/06/GitHub-Actions-Forking-Repositories).
+This repository has been created to facilitate updating your forked repositories with review actions. Especially helpful when having a separate organization for all your forked GitHub Actions (as you should for security reasons). Read more on that topic [here](https://devopsjournal.io/blog/2021/02/06/GitHub-Actions-Forking-Repositories).
 
 Process:
 * Fork this repository to the organization / account you want to update your forks in.
