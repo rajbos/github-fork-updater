@@ -10,8 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"
-    - run: echo "Found the issue title [${{ github.event.issue.title }}]"
+    - run: |
+       echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"
+       echo "Found the issue title [${{ github.event.issue.title }}]"
 
     - run: |
        .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.PAT_GITHUB }} -issueTitle "${{ github.event.issue.title }}" -issueId ${{ github.event.issue.number }} -issuesRepository  ${{ github.repository }}

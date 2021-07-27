@@ -82,9 +82,12 @@ function Main {
     )
 
     Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$issuesRepository] and a PAT that has length [$($PAT.Length)]"
+    
+    $workflowRunUrl = "$($env:GITHUB_SERVER_URL)/$($GITHUB_REPOSITORY)/actions/runs/$($GITHUB_RUN_ID)"
+    Write-Host "Found workflowRunUrl: [$workflowRunUrl]"
 
     $fork = ParseIssueTitle -issueTitle $issueTitle
-    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository" -repoName $issuesRepository -PAT $PAT
+    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository through [update-workflow]($workflowRunUrl)" -repoName $issuesRepository -PAT $PAT
     UpdateFork -fork $fork -PAT $PAT
 
     Write-Host "Cleaning up"
@@ -93,7 +96,7 @@ function Main {
 
     # make sure we are back where we started (for easier local testing)
     Set-Location $PSScriptRoot
-
+    
     AddCommentToIssue -number $issueId -message "Fork has been updated" -repoName $issuesRepository -PAT $PAT
     CloseIssue -number $issueId -issuesRepositoryName $issuesRepository -PAT $PAT
 }
