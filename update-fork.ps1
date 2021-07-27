@@ -39,6 +39,10 @@ function UpdateFork {
 
     $forkUrl = GetForkCloneUrl -fork $fork -PAT $PAT
 
+    # set user settings
+    git config --global user.email "noreply@githubupdater.com"
+    git config --global user.name "GitHub Fork Updater"
+
     # create new temp dir to hold the fork
     New-Item -ItemType Directory $sourceDirectory
     Set-Location $sourceDirectory
@@ -51,13 +55,15 @@ function UpdateFork {
     git remote add github $parent.parentUrl
 
     # fetch the changes from the parent
-    git fetch github
+    Write-Host "Fetching changes from parent repo"
+    git fetch github $parent.parentDefaultBranch
 
     # make sure you are on the right branch
     Write-Host "Pulling all changes from the parent on branch [$($parent.parentDefaultBranch)]"
     git checkout $parent.parentDefaultBranch
 
     # merge in any changes from the branch
+    Write-Host "Merging changes from parent repo"
     git merge github/$($parent.parentDefaultBranch) --ff
 
     # push the changes back to your repo
