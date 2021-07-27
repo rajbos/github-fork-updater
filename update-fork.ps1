@@ -83,7 +83,7 @@ function Main {
 
     Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$issuesRepository] and a PAT that has length [$($PAT.Length)]"
     
-    $workflowRunUrl = "$($env:GITHUB_SERVER_URL)/$($GITHUB_REPOSITORY)/actions/runs/$($GITHUB_RUN_ID)"
+    $workflowRunUrl = "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)/actions/runs/$($env:GITHUB_RUN_ID)"
     Write-Host "Found workflowRunUrl: [$workflowRunUrl]"
 
     $fork = ParseIssueTitle -issueTitle $issueTitle
