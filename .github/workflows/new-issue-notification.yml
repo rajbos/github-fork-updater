@@ -9,8 +9,8 @@ jobs:
       - uses: asml-actions/issue-comment-tag@v0.1.0
         name: Tag a user or team in an issue comment
         with: 
-          issue: ${{ github.issue.number }}
+          issue: ${{ github.event.issue.number }}
           team: rise
           owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository_name }}
+          repo: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
