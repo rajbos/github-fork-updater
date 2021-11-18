@@ -13,4 +13,4 @@ jobs:
           team: asml-actions/rise
           owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
