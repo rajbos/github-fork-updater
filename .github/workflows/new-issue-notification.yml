@@ -1,0 +1,16 @@
+on:
+  issues:
+    types: [opened]
+    
+jobs:
+  tag-a-user:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: asml-actions/issue-comment-tag
+        name: Tag a user or team in an issue comment
+        with: 
+          issue: ${{ github.issue.number }}
+          team: rise
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
