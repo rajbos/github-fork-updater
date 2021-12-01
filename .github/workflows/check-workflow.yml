@@ -13,13 +13,19 @@ jobs:
       update: ${{steps.update_step.outputs.update}}
 
     steps:
+    - uses: asml-actions/workflow-application-token-action@main
+      id: get_workflow_token
+      with:
+        application_id: ${{ secrets.GH_AUTOMATION_ID }}
+        application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
+
     - uses: actions/checkout@v2
 
     - id: update_step
       shell: pwsh
       name: Check for updates
       run: | 
-        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} -issuesRepository ${{ github.repository }} )
+        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get_workflow_token.outputs.token }} -issuesRepository ${{ github.repository }} )
         
         if ($null -ne $updateResult) {
           $reposWithUpdates = $updateResult[-1]

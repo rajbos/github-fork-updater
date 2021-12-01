@@ -8,6 +8,12 @@ jobs:
     if: github.event.label.name == 'update-fork'
 
     steps:
+    - uses: asml-actions/workflow-application-token-action@main
+      id: get_workflow_token
+      with:
+        application_id: ${{ secrets.GH_AUTOMATION_ID }}
+        application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
+
     - uses: actions/checkout@v2
 
     - run: |
@@ -15,5 +21,5 @@ jobs:
        echo "Found the issue title [${{ github.event.issue.title }}]"
 
     - run: |
-       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.PAT_GITHUB }} -issueTitle "${{ github.event.issue.title }}" -issueId ${{ github.event.issue.number }} -issuesRepository  ${{ github.repository }}
+       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get_workflow_token.outputs.token }} -issueTitle "${{ github.event.issue.title }}" -issueId ${{ github.event.issue.number }} -issuesRepository  ${{ github.repository }}
       shell: pwsh
