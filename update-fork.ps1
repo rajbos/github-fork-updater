@@ -68,7 +68,7 @@ function UpdateFork {
 
     # push the changes back to your repo
     Write-Host "Pushing changes back to fork"
-    git push --tags
+    git push origin $parent.parentDefaultBranch --tags
 
     Write-Host "Completed fork update"
 }
