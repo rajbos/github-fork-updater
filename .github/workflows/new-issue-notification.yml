@@ -3,9 +3,16 @@ on:
     types: [opened]
     
 jobs:
+  # tag the RISE team on any new issues created in this repo
   tag-a-user:
     runs-on: ubuntu-latest
     steps: 
+      - uses: asml-actions/workflow-application-token-action@main
+        id: get_workflow_token
+        with:
+          application_id: ${{ secrets.GH_AUTOMATION_ID }}
+          application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
+
       - uses: asml-actions/issue-comment-tag@v0.1.0
         name: Tag a user or team in an issue comment
         with: 
@@ -13,4 +20,4 @@ jobs:
           team: asml-actions/rise
           owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
