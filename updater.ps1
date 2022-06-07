@@ -120,7 +120,7 @@ function CheckAllReposInOrg {
             if ($repo.full_name -eq "rajbos/mutation-testing-elements") {
                 Write-Host "Break here for testing"
             }
-            $repoInfo = FindRepoOrigin -repoUrl $repo.url
+            $repoInfo = FindRepoOrigin -repoUrl $repo.url -userName $userName -PAT $PAT
             if ($repoInfo.updateAvailable) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
 

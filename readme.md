@@ -13,7 +13,7 @@ Process:
 # Steps
 Watch the demo video here:  
 
-[![Watch the demo video here](https://img.youtube.com/vi/Jj033ffS1YQ/hqdefault.jpg)](https://youtu.be/Jj033ffS1YQ)
+[![Watch the demo video here](video-image.png)](https://youtu.be/Jj033ffS1YQ)
 
 
 Or follow these steps:
