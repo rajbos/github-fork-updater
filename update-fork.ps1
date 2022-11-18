@@ -38,7 +38,7 @@ function UpdateFork {
     )
 
     $forkUrl = GetForkCloneUrl -fork $fork -PAT $PAT
-
+    
     # set user settings
     git config --global user.email "noreply@githubupdater.com"
     git config --global user.name "GitHub Fork Updater"
@@ -46,6 +46,7 @@ function UpdateFork {
     # create new temp dir to hold the fork
     New-Item -ItemType Directory $sourceDirectory
     Set-Location $sourceDirectory
+    Write-Host "Clone fork from url [$forkUrl]"
     git clone $forkUrl .
 
     $parent = GetParentInfo -fork $fork
