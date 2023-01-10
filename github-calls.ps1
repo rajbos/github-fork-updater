@@ -96,7 +96,7 @@ function GetParentInfo {
     }
 
     return [PSCustomObject]@{
-        parentUrl = $info.parent.git_url
+        parentUrl = $info.parent.html_url
         parentDefaultBranch = $info.parent.default_branch
     }
 
