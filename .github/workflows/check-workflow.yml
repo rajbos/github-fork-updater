@@ -13,7 +13,7 @@ jobs:
       update: ${{steps.update_step.outputs.update}}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - id: update_step
       shell: pwsh
