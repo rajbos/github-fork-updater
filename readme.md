@@ -46,6 +46,12 @@ After reviewing the changes in the parent repository, you can decide to pull in 
 Note: currently only the `default branch` will be updated.
 
 ## Security 
-To be able to push the incoming changes into your fork we need a GitHub Personal Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow`.
-
+To be able to push the incoming changes into your fork we need a GitHub Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow`.  
 `*` These scopes are set by default when the `workflows` scope is set
+
+There are two ways to create this token:
+1. Use a GitHub App and get the token from it (Recommended)
+1. Use a Personal Access Token (has to much rights and is a security risk)!
+
+You can read more information about this in this [blogpost](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
+
