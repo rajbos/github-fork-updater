@@ -100,7 +100,7 @@ function Main {
     $forkResult = UpdateFork -fork $fork -PAT $PAT
     if ($forkResult -eq 1) {
         Write-Host "Error with the update of the fork, halting execution"
-        AddCommentToIssue -number $issueId -message "Found merge conflicts, aborting the update" -repoName $issuesRepository -PAT $PAT
+        AddCommentToIssue -number $issueId -message ":alert: Found merge conflicts, aborting the update" -repoName $issuesRepository -PAT $PAT
         return 1
     }
 
