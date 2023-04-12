@@ -21,10 +21,12 @@ jobs:
         github_app_token: ${{ steps.get-workflow-token.outputs.token }}
         PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
       run: |
-        if [ -z $github_app_token ]; then
+        if [ -n $github_app_token ]; then
           echo "token=$github_app_token" >> $GITHUB_OUTPUT
+          echo "Using token from GitHub App"
         else
           echo "token=$PAT_GITHUB" >> $GITHUB_OUTPUT
+          echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
     - uses: asml-actions/issue-comment-tag@v0.1.0
