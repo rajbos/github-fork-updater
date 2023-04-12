@@ -28,7 +28,7 @@ jobs:
         github_app_token: ${{ steps.get-workflow-token.outputs.token }}
         PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
       run: |
-        if [ -z $github_app_token ]; then
+        if [ -n $github_app_token ]; then
           echo "token=$github_app_token" >> $GITHUB_OUTPUT
           echo "Using token from GitHub App"
         else
