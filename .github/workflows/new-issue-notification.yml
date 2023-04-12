@@ -26,11 +26,11 @@ jobs:
           echo "token=$PAT_GITHUB" >> $GITHUB_OUTPUT
         fi
 
-      - uses: asml-actions/issue-comment-tag@v0.1.0
-        name: Tag a user or team in an issue comment
-        with: 
-          issue: ${{ github.event.issue.number }}
-          team: ${{ vars.NOTIFICATION_TEAM }}
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
+    - uses: asml-actions/issue-comment-tag@v0.1.0
+      name: Tag a user or team in an issue comment
+      with: 
+        issue: ${{ github.event.issue.number }}
+        team: ${{ vars.NOTIFICATION_TEAM }}
+        owner: ${{ github.repository_owner }}
+        repo: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
