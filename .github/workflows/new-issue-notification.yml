@@ -1,3 +1,4 @@
+name: Send notification on new issue
 on:
   issues:
     types: [opened]

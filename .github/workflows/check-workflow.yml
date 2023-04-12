@@ -1,3 +1,4 @@
+name: Check for updates for all forks
 on: 
   push:
     branches:
