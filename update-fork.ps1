@@ -67,6 +67,14 @@ function UpdateFork {
     Write-Host "Merging changes from parent repo"
     git merge github/$($parent.parentDefaultBranch) --ff
 
+    # check if there are any merge conflicts
+    $mergeConflict = git status | Select-String "both modified"
+    if ($mergeConflict) {
+        Write-Host "Found merge conflicts, aborting the update"
+        git merge --abort
+        return 1
+    }
+
     # push the changes back to your repo
     Write-Host "Pushing changes back to fork"
     git push origin $parent.parentDefaultBranch --tags
@@ -89,7 +97,12 @@ function Main {
 
     $fork = ParseIssueTitle -issueTitle $issueTitle
     AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository through [update-workflow]($workflowRunUrl)" -repoName $issuesRepository -PAT $PAT
-    UpdateFork -fork $fork -PAT $PAT
+    $forkResult = UpdateFork -fork $fork -PAT $PAT
+    if ($forkResult -eq 1) {
+        Write-Host "Error with the update of the fork, halting execution"
+        AddCommentToIssue -number $issueId -message "Found merge conflicts, aborting the update" -repoName $issuesRepository -PAT $PAT
+        return 1
+    }
 
     Write-Host "Cleaning up"
     Set-Location ..
@@ -105,4 +118,8 @@ function Main {
 # uncomment for local testing
 #$issueTitle = "Parent repository for [rajbos/pickles] has updates available"; $PAT=$env:GitHubPAT; $repoName = "rajbos/github-fork-updater"; $issueId = 24
 
-Main -issueTitle $issueTitle -PAT $PAT -issueId $issueId -issuesRepository $issuesRepository
+$result = Main -issueTitle $issueTitle -PAT $PAT -issueId $issueId -issuesRepository $issuesRepository
+if ($result -eq 1) {
+    Write-Host "Error with the update of the fork, returning with failure"
+    exit 1
+}
