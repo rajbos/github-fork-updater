@@ -4,8 +4,8 @@ on:
     
 jobs:
   # tag the team from the variables on any new issues created in this repo
-  if: ${{ vars.SEND_NOTIFICATION == 'true' }}
   tag-a-user:
+    if: ${{ vars.SEND_NOTIFICATION == 'true' }}
     runs-on: ubuntu-latest
     steps: 
     - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
