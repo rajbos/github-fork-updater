@@ -13,11 +13,23 @@ jobs:
       update: ${{steps.update_step.outputs.update}}
 
     steps:
-    - uses: asml-actions/workflow-application-token-action@main
-      id: get_workflow_token
+    - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+      if: ${{ vars.USE_GITHUB_APP == 'true' }}
+      id: get-workflow-token
       with:
         application_id: ${{ secrets.GH_AUTOMATION_ID }}
         application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
+
+    - id: get-token
+      env: 
+        github_app_token: ${{ steps.get-workflow-token.outputs.token }}
+        PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
+      run: |
+        if [ -z $github_app_token ]; then
+          echo "token=$github_app_token" >> $GITHUB_OUTPUT
+        else
+          echo "token=$PAT_GITHUB" >> $GITHUB_OUTPUT
+        fi
 
     - uses: actions/checkout@v2
 
@@ -25,7 +37,7 @@ jobs:
       shell: pwsh
       name: Check for updates
       run: | 
-        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get_workflow_token.outputs.token }} -issuesRepository ${{ github.repository }} )
+        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get-token.outputs.token }} -issuesRepository ${{ github.repository }} )
         
         if ($null -ne $updateResult) {
           $reposWithUpdates = $updateResult[-1]
