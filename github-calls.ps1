@@ -74,10 +74,10 @@ function CallWebRequest {
 
 function GetForkCloneUrl {
     param (
-        [string] $forkUrl,
+        [string] $fork,
         [string] $PAT
     )
-
+    Write-Host "Generate the forkUrl for [$fork]"
     return "https://xx:$PAT@github.com/$fork.git"
 }
 
