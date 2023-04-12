@@ -49,7 +49,7 @@ function UpdateFork {
     Write-Host "Clone fork from url [$forkUrl]"
     git clone $forkUrl .
 
-    $parent = GetParentInfo -fork $fork
+    $parent = GetParentInfo -fork $fork -PAT $PAT
     Write-Host "Found forks parent with url [$($parent.parentUrl)]"
 
     # add remote to the parent
@@ -96,7 +96,7 @@ function Main {
     Write-Host "Found workflowRunUrl: [$workflowRunUrl]"
 
     $fork = ParseIssueTitle -issueTitle $issueTitle
-    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository through [update-workflow]($workflowRunUrl)" -repoName $issuesRepository -PAT $PAT
+    AddCommentToIssue -number $issueId -message "Updating the fork with the incoming changes from the parent repository through [update-workflow]($workflowRunUrl)." -repoName $issuesRepository -PAT $PAT
     $forkResult = UpdateFork -fork $fork -PAT $PAT
     if ($forkResult -eq 1) {
         Write-Host "Error with the update of the fork, halting execution"
