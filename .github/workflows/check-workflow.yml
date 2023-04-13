@@ -1,3 +1,4 @@
+name: Check for updates for all forks
 on: 
   push:
     branches:
@@ -13,13 +14,35 @@ jobs:
       update: ${{steps.update_step.outputs.update}}
 
     steps:
+    - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+      name: Get token from GitHub App
+      if: ${{ vars.USE_GITHUB_APP == 'true' }}
+      id: get-workflow-token
+      with:
+        application_id: ${{ secrets.GH_AUTOMATION_ID }}
+        application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
+
+    - id: get-token
+      name: Determine token to use
+      env: 
+        github_app_token: ${{ steps.get-workflow-token.outputs.token }}
+        PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
+      run: |
+        if [ -n "$github_app_token" ]; then
+          echo "token=$github_app_token" >> $GITHUB_OUTPUT
+          echo "Using token from GitHub App"
+        else
+          echo "token=$PAT_GITHUB" >> $GITHUB_OUTPUT
+          echo "Using personal access token from secret 'PAT_GITHUB'"
+        fi
+
     - uses: actions/checkout@v3
 
     - id: update_step
       shell: pwsh
       name: Check for updates
       run: | 
-        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ secrets.GITHUB_TOKEN }} -issuesRepository ${{ github.repository }} )
+        $updateResult = (.\updater.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get-token.outputs.token }} -issuesRepository ${{ github.repository }} )
         
         if ($null -ne $updateResult) {
           $reposWithUpdates = $updateResult[-1]

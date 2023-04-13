@@ -1,14 +1,14 @@
-name: Update the fork
-on: 
+name: Send notification on new issue
+on:
   issues:
-    types: [labeled]
-
+    types: [opened]
+    
 jobs:
-  update-fork:
+  # tag the team from the variables on any new issues created in this repo
+  tag-a-user:
+    if: ${{ vars.SEND_NOTIFICATION == 'true' }}
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'update-fork'
-
-    steps:
+    steps: 
     - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
       if: ${{ vars.use_github_app == 'true' }}
       id: get-workflow-token
@@ -29,12 +29,11 @@ jobs:
           echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
-    - uses: actions/checkout@v3
-
-    - run: |
-       echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"
-       echo "Found the issue title [${{ github.event.issue.title }}]"
-
-    - run: |
-       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get-token.outputs.token }} -issueTitle "${{ github.event.issue.title }}" -issueId ${{ github.event.issue.number }} -issuesRepository  ${{ github.repository }}
-      shell: pwsh
+    - uses: asml-actions/issue-comment-tag@v0.1.0
+      name: Tag a user or team in an issue comment
+      with: 
+        issue: ${{ github.event.issue.number }}
+        team: ${{ vars.NOTIFICATION_TEAM }}
+        owner: ${{ github.repository_owner }}
+        repo: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}

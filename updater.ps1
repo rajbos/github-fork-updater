@@ -24,7 +24,7 @@ function FindAllRepos {
         [string] $PAT
     )
 
-    $url = "https://api.github.com/orgs/$orgName/repos"
+    $url = "https://api.github.com/orgs/$orgName/repos?per_page=100"
     $info = CallWebRequest -url $url -userName $userName -PAT $PAT
 
     if ($info -eq "https://docs.github.com/rest/reference/repos#list-organization-repositories") {
@@ -71,6 +71,7 @@ function FindRepoOrigin {
 
     return [PSCustomObject]@{
         parentUrl = $info.parent.html_url
+        parentArchived = $info.parent.archived        
         defaultBranch = $defaultBranch
         lastPushRepo = $info.pushed_at
         lastPushParent = $branchLastCommitDate
@@ -121,11 +122,12 @@ function CheckAllReposInOrg {
                 Write-Host "Break here for testing"
             }
             $repoInfo = FindRepoOrigin -repoUrl $repo.url -userName $userName -PAT $PAT
-            if ($repoInfo.updateAvailable) {
+            if ($repoInfo.updateAvailable -or $repoInfo.parentArchived) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
 
                 $repoData = [PSCustomObject]@{
                     repoName = $repo.full_name
+                    parentArchived = $repoInfo.parentArchived
                     parentUrl = $repoInfo.parentUrl
                     compareUrl = $repoInfo.compareUrl
                 }
@@ -158,11 +160,16 @@ function CreateIssueFor {
     #Write-Host "- parentUrl $($repoInfo.parentUrl)"
     #Write-Host "- compareUrl $($repoInfo.compareUrl)"
 
-    $issueTitle = "Parent repository for [$($repoInfo.repoName)] has updates available"
+    if ($repoInfo.parentArchived) {
+        $issueTitle = "Parent repository for [$($repoInfo.repoName)] is archived"
+        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** is archived. `r`n### Important!`r`nconsider revisiting the usage and find alternatives"
+    } else {
+        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork automatically."
+        $issueTitle = "Parent repository for [$($repoInfo.repoName)] has updates available"
+    }
     $existingIssueForRepo = $existingIssues | Where-Object {$_.title -eq $issueTitle}
 
     if ($null -eq $existingIssueForRepo) {
-        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork automatically."
         CreateNewIssueForRepo -repoInfo $repo -issuesRepositoryName $issuesRepository -title $issueTitle -body $body -PAT $PAT -userName $userName
     } 
     else {
