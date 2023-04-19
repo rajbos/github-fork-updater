@@ -1,6 +1,9 @@
 name: New Issue
 
-on:  
+on:
+  push:
+    paths:
+     - ./github/workflows/send-issue-notification.yml
   issues:
     types:
       - opened
