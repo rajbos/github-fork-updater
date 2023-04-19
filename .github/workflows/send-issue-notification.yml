@@ -5,8 +5,7 @@ on:
     paths:
      - ./github/workflows/send-issue-notification.yml
   issues:
-    types:
-      - opened
+    types: [opened]
 
 permissions:
   issues: write
