@@ -3,7 +3,7 @@ name: New Issue
 on:
   push:
     paths:
-     - ./github/workflows/send-issue-notification.yml
+     - .github/workflows/send-issue-notification.yml
   issues:
     types: [opened]
 
