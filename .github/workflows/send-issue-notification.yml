@@ -36,25 +36,4 @@ jobs:
         url: "${{ github.event.issue.html_url }}"
         teams_webhook_url: ${{ secrets.TEST_TEAMS_WEBHOOK_URL }} # Testing channel in RISE
         #teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }} # GitHub Operational Alerts channel in Greenhouse
-        
-    - name: Get Name of the SPOC
-      id: get_spoc_name
-      run: |
-        cd config
-        this_week=$( date +%U )        
-        while IFS=, read -r date name backup week week_number primary_spoc backup_spoc
-        do
-          echo "$week_number : $primary_spoc"
-          if [[ "$this_week" == "$week_number" ]]; then
-            echo "spoc_name=${primary_spoc}" >> $GITHUB_OUTPUT
-            echo "backup_spoc_name=${backup_spoc}" >> $GITHUB_OUTPUT
-          fi
-        done < spoc.csv
       
-    - name: Auto-assign to SPOC
-      id: auto-assign_to_spoc
-      uses: asml-actions/auto-assign-issue@v1
-      if: ${{ steps.get_spoc_name.outputs.spoc_name != '' }}
-      with:
-        assignees: ${{ steps.get_spoc_name.outputs.spoc_name }}, ${{ steps.get_spoc_name.outputs.backup_spoc_name }}
-        
