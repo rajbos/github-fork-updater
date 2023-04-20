@@ -1,9 +1,6 @@
 name: Send New Issue Alert on Teams
 
 on:
-  push:
-    paths:
-     - .github/workflows/send-issue-notification.yml
   issues:
     types: [opened,labeled]
     
@@ -19,21 +16,12 @@ jobs:
     - name: Checkout the repo 
       uses: actions/checkout@v3
     
-    - name: Testing step
-      if: true # can be enabled for testing getting information
-      run: |
-        echo "Hello world from issue number [${{ github.event.issue.number }}] and title ${{ github.event.issue.title }}"
-        echo "Context [${{ github.event.action }}]"
-        echo "testing [${{ github.event }}]"
-        echo "User [${{ github.event.issue.user.login }}]"
-        echo $TEST
-    
     - uses: asml-gh/ms-teams-notification@main
       with: 
         title: "Issue [${{ github.event.action }}]: '${{ github.event.issue.title }}'"
-        text: "Issue (# ${{ github.event.issue.number }}) [${{ github.event.action }}]  in asml-actions/github-fork-updater repo by [${{ github.event.issue.user.login }}]"
+        text: "New Github Action Update (# ${{ github.event.issue.number }}) [${{ github.event.action }}]  available in asml-actions/github-fork-updater repo by [${{ github.event.issue.user.login }}]"
         button_text: 'Go to the issue'
         url: "${{ github.event.issue.html_url }}"
-        #teams_webhook_url: ${{ secrets.TEST_TEAMS_WEBHOOK_URL }} # Testing channel in RISE
-        teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }} # GitHub Operational Alerts channel in Greenhouse
+        teams_webhook_url: ${{ secrets.TEST_TEAMS_WEBHOOK_URL }} # Testing channel in RISE
+        #teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }} # GitHub Operational Alerts channel in Greenhouse
       
