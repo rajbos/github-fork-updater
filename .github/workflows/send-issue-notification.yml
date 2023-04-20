@@ -1,4 +1,4 @@
-name: New Issue
+name: Send New Issue Alert on Teams
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         title: "Issue [${{ github.event.action }}]: '${{ github.event.issue.title }}'"
         text: "Issue (# ${{ github.event.issue.number }}) [${{ github.event.action }}]  in asml-actions/github-fork-updater repo by [${{ github.event.issue.user.login }}]"
         button_text: 'Go to the issue'
-        url: "https://github.com/asml-actions/github-fork-updater/issues"
+        url: "${{ github.event.issue.html_url }}"
         teams_webhook_url: ${{ secrets.TEST_TEAMS_WEBHOOK_URL }} # Testing channel in RISE
         #teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }} # GitHub Operational Alerts channel in Greenhouse
         
