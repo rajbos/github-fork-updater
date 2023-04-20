@@ -1,4 +1,4 @@
-name: Send New Issue Alert on Teams
+name: Send New Actions update Alert on Teams
 
 on:
   issues:
