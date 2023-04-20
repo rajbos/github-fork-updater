@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Testing step
-      if: false # can be enabled for testing getting information
+      if: true # can be enabled for testing getting information
       run: |
         echo "Hello world from issue number [${{ github.event.issue.number }}] and title ${{ github.event.issue.title }}"
         echo "Context [${{ github.event.action }}]"
