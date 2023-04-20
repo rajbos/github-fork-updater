@@ -5,7 +5,8 @@ on:
     paths:
      - .github/workflows/send-issue-notification.yml
   issues:
-    types: [opened]
+    types: [opened,labeled]
+    
 
 permissions:
   issues: write
@@ -23,6 +24,7 @@ jobs:
       run: |
         echo "Hello world from issue number [${{ github.event.issue.number }}] and title ${{ github.event.issue.title }}"
         echo "Context [${{ github.event.action }}]"
+        echo "testing [${{ github.event }}]"
         echo "User [${{ github.event.issue.user.login }}]"
         echo $TEST
     
