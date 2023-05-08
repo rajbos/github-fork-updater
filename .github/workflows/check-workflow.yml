@@ -47,5 +47,5 @@ jobs:
         if ($null -ne $updateResult) {
           $reposWithUpdates = $updateResult[-1]
           Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
-          echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
+          echo "update=$($reposWithUpdates.Count -gt 0)" >> $env:$GITHUB_OUTPUT
         }
