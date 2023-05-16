@@ -9,7 +9,7 @@ jobs:
     if: github.event.label.name == 'update-fork'
 
     steps:
-    - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+    - uses: peter-murray/workflow-application-token-action@b1ad34e28f4ef30582df1bd5f45df2044eb7a6b9 # v2.1.0
       if: ${{ vars.use_github_app == 'true' }}
       id: get-workflow-token
       with:
@@ -17,11 +17,12 @@ jobs:
         application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
 
     - id: get-token
+      name: Determine token to use
       env: 
         github_app_token: ${{ steps.get-workflow-token.outputs.token }}
         PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
       run: |
-        if [ -n $github_app_token ]; then
+        if [ -n "$github_app_token" ]; then
           echo "token=$github_app_token" >> $GITHUB_OUTPUT
           echo "Using token from GitHub App"
         else

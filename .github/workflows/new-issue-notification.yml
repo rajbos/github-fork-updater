@@ -9,7 +9,7 @@ jobs:
     if: ${{ vars.SEND_NOTIFICATION == 'true' }}
     runs-on: ubuntu-latest
     steps: 
-    - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+    - uses: peter-murray/workflow-application-token-action@b1ad34e28f4ef30582df1bd5f45df2044eb7a6b9 # v2.1.0
       if: ${{ vars.use_github_app == 'true' }}
       id: get-workflow-token
       with:
@@ -29,7 +29,7 @@ jobs:
           echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
-    - uses: asml-actions/issue-comment-tag@v0.1.0
+    - uses: devops-actions/issue-comment-tag@v0.1.0
       name: Tag a user or team in an issue comment
       with: 
         issue: ${{ github.event.issue.number }}

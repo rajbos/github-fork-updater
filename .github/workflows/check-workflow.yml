@@ -14,7 +14,7 @@ jobs:
       update: ${{steps.update_step.outputs.update}}
 
     steps:
-    - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+    - uses: peter-murray/workflow-application-token-action@b1ad34e28f4ef30582df1bd5f45df2044eb7a6b9 # v2.1.0
       name: Get token from GitHub App
       if: ${{ vars.USE_GITHUB_APP == 'true' }}
       id: get-workflow-token
@@ -47,5 +47,5 @@ jobs:
         if ($null -ne $updateResult) {
           $reposWithUpdates = $updateResult[-1]
           Write-Host "Are there any updates available? [$($reposWithUpdates.Count -gt 0)]"
-          echo "::set-output name=update::$($reposWithUpdates.Count -gt 0)"
+          echo "update=$($reposWithUpdates.Count -gt 0)" >> $env:GITHUB_OUTPUT
         }
