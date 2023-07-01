@@ -29,7 +29,7 @@ jobs:
           echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
-    - uses: devops-actions/issue-comment-tag@v0.1.0
+    - uses: devops-actions/issue-comment-tag@v0.1.8
       name: Tag a user or team in an issue comment
       with: 
         issue: ${{ github.event.issue.number }}
