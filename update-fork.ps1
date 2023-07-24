@@ -1,5 +1,3 @@
-
-
 # example calls:
 # .\update-fork.ps1 -orgName "rajbos-actions" -userName "xxx" -PAT $env:GitHubPAT $issueTitle "Parent repository for [rajbos/azure-docs] has updates available"
 

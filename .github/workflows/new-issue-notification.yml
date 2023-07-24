@@ -27,8 +27,8 @@ jobs:
         else
           echo "token=$PAT_GITHUB" >> $GITHUB_OUTPUT
           echo "Using personal access token from secret 'PAT_GITHUB'"
-        fi
-
+        fi  
+        
     - uses: asml-actions/issue-comment-tag@v0.1.0
       name: Tag a user or team in an issue comment
       with: 

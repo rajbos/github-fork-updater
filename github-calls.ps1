@@ -174,6 +174,5 @@ function CreateNewIssueForRepo {
 
     Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
     $result = CallWebRequest -url $url -verbToUse "POST" -body $data -PAT $PAT -userName $userName
-
     Write-Host "Issue has been created and can be found at this url: ($($result.html_url))"
 }
