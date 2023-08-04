@@ -29,8 +29,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const issue_id = context.issue.number
-            const issue_title = context.issue.title
+            const issue_id = ${{ github.event.issue.number }}
+            const issue_title = `${{ github.event.issue.title }}`
             const repo_name = issue_title.substring(issue_title.indexOf("/") + 1,  issue_title.lastIndexOf("]"));
             let repoData =await github.rest.repos.get({
               owner: context.repo.owner,
