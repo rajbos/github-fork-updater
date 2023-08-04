@@ -23,6 +23,13 @@ jobs:
           application_id: ${{ secrets.VALIDATION_APP_ID }}
           application_private_key: ${{ secrets.VALIDATION_APP_TOKEN }}
           organization: ${{vars.VALIDATION_ORG}}
+
+      - uses: peter-murray/workflow-application-token-action@6a9741bf210c9a93370560585c908161170ecada # v2.1.0
+        name: Get token from GitHub App for validation
+        id: get-app-token
+        with:
+          application_id: ${{ secrets.GH_AUTOMATION_ID }}
+          application_private_key: ${{ secrets.GH_AUTOMATION_PRIVATE_KEY }}
       
       - name: Get issue details
         id: get_issue_details
@@ -52,6 +59,7 @@ jobs:
         env:
             can_merge: ${{ steps.check-run.outputs.can-merge }}
         with:
+          github-token: ${{steps.get-app-token.outputs.token}}
           script: |
             const label  = process.env.can_merge
             console.log(`adding label ${label}`)
@@ -62,4 +70,3 @@ jobs:
               issue_number: context.issue.number,
               labels: [`${label}`]
             })
-
