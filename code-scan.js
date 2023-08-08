@@ -1,14 +1,12 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
-const { countReset } = require("console");
 const fs = require("fs");
-const token = process.argv[2];
-const repo = process.argv[3];
-const originalOwner = process.argv[4];
-const owner = process.argv[5];
+const [token, repo, originalOwner, owner] = process.argv.slice(2);
+
 const octokit = new Octokit({
   auth: token,
 });
+
 const octokitFunctions = {
   getRepo: octokit.repos.get,
   delRepo: octokit.repos.delete,
@@ -17,6 +15,9 @@ const octokitFunctions = {
   listAlertsForRepo: octokit.rest.dependabot.listAlertsForRepo,
   listScanningResult: octokit.rest.codeScanning.listAlertsForRepo,
   listLanguages: octokit.rest.repos.listLanguages,
+  triggerCodeqlScan: octokit.rest.actions.createWorkflowDispatch,
+  listWorkflowRuns: octokit.rest.actions.listWorkflowRunsForRepo,
+  getWorkflowRun: octokit.rest.actions.listWorkflowRunsForRepo,
 };
 
 async function wait(milliseconds) {
@@ -28,17 +29,10 @@ async function wait(milliseconds) {
   });
 }
 
-async function octokitRequest(request) {
+async function octokitRequest(request, extraArgs = {}) {
   console.log(`Running ${request} function`);
   try {
-    // few functions require different properties
-    let requestProperties = { owner, repo };
-    switch (request) {
-      case "createFork":
-        requestProperties.owner = originalOwner;
-        requestProperties.organization = owner;
-        break;
-    }
+    const requestProperties = { owner, repo, ...extraArgs };
     const response = await octokitFunctions[request](requestProperties);
     console.log(`Function ${request} finished succesfully`);
     return response.data;
@@ -47,7 +41,7 @@ async function octokitRequest(request) {
   }
 }
 
-async function putRequest(request, extraProps) {
+async function putRequest(request, extraProps={}) {
   //generic function for PUT requests
   try {
     await octokit.request(`PUT /repos/{owner}/{repo}/${request}`, {
@@ -58,26 +52,6 @@ async function putRequest(request, extraProps) {
   } catch (error) {
     console.log(`Failed to run ${request}: ${error.message}`);
   }
-}
-
-async function getSha(ref) {
-  response = await octokit.rest.git.getRef({
-    owner,
-    repo,
-    ref: `heads/${ref}`,
-  });
-  return response.data;
-}
-
-async function deleteExistingWorkflows(sha) {
-  console.log(`Delete existing workflows`);
-  await octokit.rest.repos.deleteFile({
-    owner,
-    repo,
-    path: ".github/workflows/codeql-analysis.yml",
-    message: "🤖 Delete existing workflows",
-    sha,
-  });
 }
 
 async function pushWorkflowFile() {
@@ -103,22 +77,9 @@ async function pushWorkflowFile() {
   }
 }
 
-async function triggerCodeqlScan(workflow_id, ref) {
-  console.log(`Trigger codeql scan`);
-  const response = await octokit.rest.actions.createWorkflowDispatch({
-    owner,
-    repo,
-    workflow_id,
-    ref,
-  });
-  return response.status;
-}
-
 async function waitForCodeqlScan() {
   console.log(`Get the dispatched run id`);
-  const response = await octokit.rest.actions.listWorkflowRunsForRepo({
-    owner,
-    repo,
+  const response = await octokitRequest("listWorkflowRuns", {
     event: "workflow_dispatch",
   });
 
@@ -128,9 +89,7 @@ async function waitForCodeqlScan() {
   while (status != "completed") {
     console.log(`Wait for scan to complete - Run id : ${run_id}`);
     await wait(15000);
-    const run_status = await octokit.rest.actions.getWorkflowRun({
-      owner,
-      repo,
+    const run_status = await octokitRequest("listWorkflowRunsForRepo", {
       run_id,
     });
     if (run_status.data.status == "completed") {
@@ -163,24 +122,25 @@ function checkForBlockingAlerts(codeScanningAlerts, dependabotAlerts) {
 
 async function run() {
   await octokitRequest("delRepo");
-  const forkRepo = await octokitRequest("createFork");
+  const forkRepo = await octokitRequest("createFork", {
+    owner: originalOwner,
+    organization: owner,
+  });
 
   await wait(5000);
-  await putRequest("vulnerability-alerts", {}); // Enable dependabot
+  await putRequest("vulnerability-alerts"); // Enable dependabot
 
   await wait(5000);
-
-  // await disableExistingWorkflows()
-
+  
   // Push Codeql.yml file
   await pushWorkflowFile();
 
   //Trigger a scan
   await wait(15000);
-  const codeqlStatus = await triggerCodeqlScan(
-    `codeql-analysis-check.yml`,
-    forkRepo.default_branch
-  );
+  const codeqlStatus = await octokitRequest("triggerCodeqlScan", {
+    workflow_id: `codeql-analysis-check.yml`,
+    ref: forkRepo.parent.default_branch,
+  });
   if (codeqlStatus == 204) {
     //Wait for the scan to complete
     console.log(`Wait for job to start !`);
