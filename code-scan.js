@@ -17,7 +17,7 @@ const octokitFunctions = {
   listLanguages: octokit.rest.repos.listLanguages,
   triggerCodeqlScan: octokit.rest.actions.createWorkflowDispatch,
   listWorkflowRuns: octokit.rest.actions.listWorkflowRunsForRepo,
-  getWorkflowRun: octokit.rest.actions.listWorkflowRunsForRepo,
+  getWorkflowRun: octokit.rest.actions.getWorkflowRun,
 };
 
 async function wait(milliseconds) {
@@ -35,7 +35,7 @@ async function octokitRequest(request, extraArgs = {}) {
     const requestProperties = { owner, repo, ...extraArgs };
     const response = await octokitFunctions[request](requestProperties);
     console.log(`Function ${request} finished succesfully`);
-    return response.data;
+    return response;
   } catch (error) {
     console.log(`Failed to run ${request}: ${error.message}`);
   }
@@ -56,7 +56,7 @@ async function putRequest(request, extraProps={}) {
 
 async function pushWorkflowFile() {
   let languages = await octokitRequest("listLanguages");
-  languages = `${JSON.stringify(Object.keys(languages))}`;
+  languages = `${JSON.stringify(Object.keys(languages.data))}`;
   console.log(`Detected languages: ${languages}`);
 
   console.log(`Add Codeql workflow file`);
@@ -82,14 +82,13 @@ async function waitForCodeqlScan() {
   const response = await octokitRequest("listWorkflowRuns", {
     event: "workflow_dispatch",
   });
-
   const run_id = response.data.workflow_runs[0].id;
 
   let status = "queued";
   while (status != "completed") {
     console.log(`Wait for scan to complete - Run id : ${run_id}`);
     await wait(15000);
-    const run_status = await octokitRequest("listWorkflowRunsForRepo", {
+    const run_status = await octokitRequest("getWorkflowRun", {
       run_id,
     });
     if (run_status.data.status == "completed") {
@@ -139,9 +138,9 @@ async function run() {
   await wait(15000);
   const codeqlStatus = await octokitRequest("triggerCodeqlScan", {
     workflow_id: `codeql-analysis-check.yml`,
-    ref: forkRepo.parent.default_branch,
+    ref: forkRepo.data.parent.default_branch,
   });
-  if (codeqlStatus == 204) {
+  if (codeqlStatus.status == 204) {
     //Wait for the scan to complete
     console.log(`Wait for job to start !`);
     await wait(15000);
@@ -150,7 +149,7 @@ async function run() {
     const dependabotAlerts = await octokitRequest("listAlertsForRepo");
     const codeqlScanAlerts = await octokitRequest("listScanningResult");
 
-    if (checkForBlockingAlerts(codeqlScanAlerts, dependabotAlerts)) {
+    if (checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)) {
       core.setOutput("can-merge", "needs-manual-check");
     } else {
       core.setOutput("can-merge", "update-fork");
