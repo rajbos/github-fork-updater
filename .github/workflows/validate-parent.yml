@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   validate-parent:
-    if: ${{github.event.label.name == 'scan-parent' || github.issue.event =='opened'}}
+    if: ${{github.event.label.name == 'scan-parent' || github.event.action == 'opened' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo

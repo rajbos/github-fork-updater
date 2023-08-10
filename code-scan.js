@@ -41,7 +41,7 @@ async function octokitRequest(request, extraArgs = {}) {
   }
 }
 
-async function putRequest(request, extraProps={}) {
+async function putRequest(request, extraProps = {}) {
   //generic function for PUT requests
   try {
     await octokit.request(`PUT /repos/{owner}/{repo}/${request}`, {
@@ -130,7 +130,7 @@ async function run() {
   await putRequest("vulnerability-alerts"); // Enable dependabot
 
   await wait(5000);
-  
+
   // Push Codeql.yml file
   await pushWorkflowFile();
 
@@ -148,11 +148,16 @@ async function run() {
 
     const dependabotAlerts = await octokitRequest("listAlertsForRepo");
     const codeqlScanAlerts = await octokitRequest("listScanningResult");
-
-    if (checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)) {
-      core.setOutput("can-merge", "needs-manual-check");
+    if (dependabotAlerts && codeqlScanAlerts) {
+      if (
+        checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)
+      ) {
+        core.setOutput("can-merge", "needs-manual-check");
+      } else {
+        core.setOutput("can-merge", "update-fork");
+      }
     } else {
-      core.setOutput("can-merge", "update-fork");
+      core.setOutput("can-merge", "needs-manual-check");
     }
   } else {
     core.setOutput("can-merge", "needs-manual-check");
