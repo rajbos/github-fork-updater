@@ -1,7 +1,7 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
 const fs = require("fs");
-const [token, repo, originalOwner, owner] = process.argv.slice(2);
+const [token, repo, originalOwner, owner, issue_number] = process.argv.slice(2);
 
 const octokit = new Octokit({
   auth: token,
@@ -11,6 +11,7 @@ const octokitFunctions = {
   getRepo: octokit.repos.get,
   delRepo: octokit.repos.delete,
   createFork: octokit.repos.createFork,
+  createIssueComment: octokit.rest.issues.createComment,
   enableDependabot: octokit.rest.repos.enableVulnerabilityAlerts,
   listAlertsForRepo: octokit.rest.dependabot.listAlertsForRepo,
   listScanningResult: octokit.rest.codeScanning.listAlertsForRepo,
@@ -140,6 +141,8 @@ async function run() {
     workflow_id: `codeql-analysis-check.yml`,
     ref: forkRepo.data.parent.default_branch,
   });
+
+  let issueBody = ""
   if (codeqlStatus.status == 204) {
     //Wait for the scan to complete
     console.log(`Wait for job to start !`);
@@ -147,20 +150,31 @@ async function run() {
     await waitForCodeqlScan();
 
     const dependabotAlerts = await octokitRequest("listAlertsForRepo");
-    const codeqlScanAlerts = await octokitRequest("listScanningResult");
+    const codeqlScanAlerts = await octokitRequest("listScanningResult");    
     if (dependabotAlerts && codeqlScanAlerts) {
       if (
         checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)
       ) {
+        issueBody = "Blocking CodeQL scan and Dependabot alerts"
         core.setOutput("can-merge", "needs-manual-check");
       } else {
         core.setOutput("can-merge", "update-fork");
       }
     } else {
+      issueBody = "No CodeQL scan or Dependabot alerts found"
       core.setOutput("can-merge", "needs-manual-check");
     }
   } else {
+    issueBody = "CodeQL scan injection failed"
     core.setOutput("can-merge", "needs-manual-check");
+  }
+
+  if (issueBody.length > 0) {
+    // create an comment in the issue to indicate why a manual check is needed
+    octokitRequest("createIssueComment", {
+      issue_number,
+      body: issueBody
+    });
   }
 }
 
