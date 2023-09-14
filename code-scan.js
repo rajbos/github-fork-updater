@@ -177,7 +177,7 @@ async function run() {
   if (issueBody.length > 0) {
     console.log(`Creating a new comment in issue [${issue_number}] in repo [${issue_owner}/${issue_repo}] to indicate status: [${issueBody}]`)
     // create an comment in the issue to indicate why a manual check is needed. uses different client!
-    issue_octokit.rest.issues.createComment("createIssueComment", {
+    issue_octokit.rest.issues.createComment({
       owner: issue_owner,
       repo: issue_repo,
       issue_number,
