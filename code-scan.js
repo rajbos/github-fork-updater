@@ -181,8 +181,5 @@ async function run() {
     console.log(`No issues with the checks`)
   }
 }
-else {
-  console.log(`CodeQL run did not start succesfully, so we have no clue what to do next.`)
-}
 
 run();
