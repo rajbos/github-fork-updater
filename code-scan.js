@@ -172,12 +172,14 @@ async function run() {
     core.setOutput("can-merge", "needs-manual-check");
   }
 
+  issue_owner = 'asml-actions'
+  issue_repo = 'github-fork-updater'
   if (issueBody.length > 0) {
-    console.log(`Creating a new comment in issue [${issue_number}] in repo [${owner}/${repo}] to indicate status: [${issueBody}]`)
+    console.log(`Creating a new comment in issue [${issue_number}] in repo [${issue_owner}/${issue_repo}] to indicate status: [${issueBody}]`)
     // create an comment in the issue to indicate why a manual check is needed. uses different client!
     issue_octokit.rest.issues.createComment("createIssueComment", {
-      owner,
-      repo,
+      owner: issue_owner,
+      repo: issue_repo,
       issue_number,
       body: issueBody
     });
