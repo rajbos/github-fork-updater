@@ -54,7 +54,7 @@ jobs:
         id: check-run
         run: |
             npm install @octokit/rest @actions/core
-            node code-scan.js  ${{steps.get-validation-token.outputs.token}} ${{steps.get_issue_details.outputs.repo-name}} ${{steps.get_issue_details.outputs.original-owner}} ${{vars.VALIDATION_ORG}} ${{ github.event.issue.number } ${{steps.get-app-token.outputs.token}}}
+            node code-scan.js  ${{steps.get-validation-token.outputs.token}} ${{steps.get_issue_details.outputs.repo-name}} ${{steps.get_issue_details.outputs.original-owner}} ${{vars.VALIDATION_ORG}} ${{ github.event.issue.number }} ${{steps.get-app-token.outputs.token}} }
 
       - name: Update the issue
         uses: actions/github-script@v6
