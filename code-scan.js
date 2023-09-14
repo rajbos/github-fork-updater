@@ -170,12 +170,19 @@ async function run() {
   }
 
   if (issueBody.length > 0) {
+    console.log(`Creating a new comment in issue [${issue_number}] to indicate [${issueBody}]`)
     // create an comment in the issue to indicate why a manual check is needed
     octokitRequest("createIssueComment", {
       issue_number,
       body: issueBody
     });
   }
+  else {
+    console.log(`No issues with the checks`)
+  }
+}
+else {
+  console.log(`CodeQL run did not start succesfully, so we have no clue what to do next.`)
 }
 
 run();
