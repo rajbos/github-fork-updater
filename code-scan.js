@@ -1,17 +1,20 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
 const fs = require("fs");
-const [token, repo, originalOwner, owner, issue_number] = process.argv.slice(2);
+const [token, repo, originalOwner, owner, issue_number, issue_token ] = process.argv.slice(2);
 
 const octokit = new Octokit({
   auth: token,
+});
+
+const issue_octokit = new Octokit({
+  auth: issue_token,
 });
 
 const octokitFunctions = {
   getRepo: octokit.repos.get,
   delRepo: octokit.repos.delete,
   createFork: octokit.repos.createFork,
-  createIssueComment: octokit.rest.issues.createComment,
   enableDependabot: octokit.rest.repos.enableVulnerabilityAlerts,
   listAlertsForRepo: octokit.rest.dependabot.listAlertsForRepo,
   listScanningResult: octokit.rest.codeScanning.listAlertsForRepo,
@@ -170,9 +173,11 @@ async function run() {
   }
 
   if (issueBody.length > 0) {
-    console.log(`Creating a new comment in issue [${issue_number}] to indicate [${issueBody}]`)
-    // create an comment in the issue to indicate why a manual check is needed
-    octokitRequest("createIssueComment", {
+    console.log(`Creating a new comment in issue [${issue_number}] in repo [${owner}/${repo}] to indicate status: [${issueBody}]`)
+    // create an comment in the issue to indicate why a manual check is needed. uses different client!
+    issue_octokit.rest.issues.createComment("createIssueComment", {
+      owner,
+      repo,
       issue_number,
       body: issueBody
     });
