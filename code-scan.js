@@ -1,7 +1,8 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
 const fs = require("fs");
-const [token, repo, originalOwner, owner, issue_number, issue_token ] = process.argv.slice(2);
+const [token, repo, originalOwner, owner, issue_number, issue_token] =
+  process.argv.slice(2);
 
 const octokit = new Octokit({
   auth: token,
@@ -60,24 +61,43 @@ async function putRequest(request, extraProps = {}) {
 
 async function pushWorkflowFile() {
   let languages = await octokitRequest("listLanguages");
-  languages = `${JSON.stringify(Object.keys(languages.data))}`;
-  console.log(`Detected languages: ${languages}`);
+  languages = Object.keys(languages.data);
+  console.log(`Detected languages: ${languages} type: ${typeof languages}`);
+  const supportedLanguages = [
+    "TypeScript",
+    "JavaScript",
+    "Ruby",
+    "Python",
+    "Kotlin",
+    "Go",
+    "C++",
+    "C#",
+    "C",
+  ];
+  languages = languages.filter((item) => supportedLanguages.includes(item));
+  if (languages.length) {
+    console.log(`Add Codeql workflow file`);
+    let workflowFile = fs.readFileSync("codeql-analysis-check.yml", "utf8");
+    workflowFile = workflowFile.replace(
+      "languageString",
+      JSON.stringify(languages)
+    );
 
-  console.log(`Add Codeql workflow file`);
-  let workflowFile = fs.readFileSync("codeql-analysis-check.yml", "utf8");
-  workflowFile = workflowFile.replace("languageString", languages);
+    console.log(`Add Codeql workflow file`);
 
-  console.log(`Add Codeql workflow file`);
-
-  try {
-    await putRequest("contents/.github/workflows/codeql-analysis-check.yml", {
-      path: ".github/workflows/check-and-validate-codeql.yml",
-      message: "Inject codeql workflow",
-      content: Buffer.from(workflowFile).toString("base64"),
-    });
-    console.log("Workflow file created successfully");
-  } catch (error) {
-    console.error("Error creating workflow file:", error);
+    try {
+      await putRequest("contents/.github/workflows/codeql-analysis-check.yml", {
+        path: ".github/workflows/check-and-validate-codeql.yml",
+        message: "Inject codeql workflow",
+        content: Buffer.from(workflowFile).toString("base64"),
+      });
+      console.log("Workflow file created successfully");
+    } catch (error) {
+      console.error("Error creating workflow file:", error);
+    }
+  } else {
+    console.log("No supported languages for codeQL.");
+    return "NoLanguages";
   }
 }
 
@@ -103,14 +123,16 @@ async function waitForCodeqlScan() {
 
 function checkForBlockingAlerts(codeScanningAlerts, dependabotAlerts) {
   let blocking = false;
-  codeScanningAlerts.forEach((alert) => {
-    if (
-      alert.rule.security_severity_level == "critical" ||
-      alert.rule.security_severity_level == "high"
-    ) {
-      blocking = true;
-    }
-  });
+  if (codeScanningAlerts) {
+    codeScanningAlerts.forEach((alert) => {
+      if (
+        alert.rule.security_severity_level == "critical" ||
+        alert.rule.security_severity_level == "high"
+      ) {
+        blocking = true;
+      }
+    });
+  }
   dependabotAlerts.forEach((alert) => {
     if (
       alert.security_advisory.severity == "critical" ||
@@ -122,7 +144,19 @@ function checkForBlockingAlerts(codeScanningAlerts, dependabotAlerts) {
 
   return blocking;
 }
-
+async function checkForAlerts(codeqlScanAlerts = [], dependabotAlerts = []) {
+  if (dependabotAlerts || codeqlScanAlerts) {
+    if (checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)) {
+      core.setOutput("can-merge", "needs-manual-check");
+      return "Blocking CodeQL scan and/pr Dependabot alerts";
+    } else {
+      core.setOutput("can-merge", "update-fork");
+    }
+  } else {
+    core.setOutput("can-merge", "needs-manual-check");
+    return "No CodeQL scan or Dependabot alerts found";
+  }
+}
 async function run() {
   await octokitRequest("delRepo");
   const forkRepo = await octokitRequest("createFork", {
@@ -136,56 +170,50 @@ async function run() {
   await wait(5000);
 
   // Push Codeql.yml file
-  await pushWorkflowFile();
-
-  //Trigger a scan
-  await wait(15000);
-  const codeqlStatus = await octokitRequest("triggerCodeqlScan", {
-    workflow_id: `codeql-analysis-check.yml`,
-    ref: forkRepo.data.parent.default_branch,
-  });
-
-  let issueBody = ""
-  if (codeqlStatus.status == 204) {
-    //Wait for the scan to complete
-    console.log(`Wait for job to start !`);
+  
+  let issueBody = "";
+  const codeqlLanguagesError = await pushWorkflowFile();
+  if (!codeqlLanguagesError) {
+    //Trigger a scan
     await wait(15000);
-    await waitForCodeqlScan();
+    const codeqlStatus = await octokitRequest("triggerCodeqlScan", {
+      workflow_id: `codeql-analysis-check.yml`,
+      ref: forkRepo.data.parent.default_branch,
+    });
 
-    const dependabotAlerts = await octokitRequest("listAlertsForRepo");
-    const codeqlScanAlerts = await octokitRequest("listScanningResult");    
-    if (dependabotAlerts && codeqlScanAlerts) {
-      if (
-        checkForBlockingAlerts(codeqlScanAlerts.data, dependabotAlerts.data)
-      ) {
-        issueBody = "Blocking CodeQL scan and Dependabot alerts"
-        core.setOutput("can-merge", "needs-manual-check");
-      } else {
-        core.setOutput("can-merge", "update-fork");
-      }
+    if (codeqlStatus.status == 204) {
+      //Wait for the scan to complete
+      console.log(`Wait for job to start !`);
+      await wait(15000);
+      await waitForCodeqlScan();
+
+      const dependabotAlerts = await octokitRequest("listAlertsForRepo");
+      const codeqlScanAlerts = await octokitRequest("listScanningResult");
+      issueBody = checkForAlerts(codeqlScanAlerts, dependabotAlerts);
     } else {
-      issueBody = "No CodeQL scan or Dependabot alerts found"
+      issueBody = "CodeQL scan injection failed";
       core.setOutput("can-merge", "needs-manual-check");
     }
   } else {
-    issueBody = "CodeQL scan injection failed"
-    core.setOutput("can-merge", "needs-manual-check");
+    await wait(60000); // Since we don't know how long dependabot will take to scan the wait is 1 minute.
+    const dependabotAlerts = await octokitRequest("listAlertsForRepo");
+    checkForAlerts([], dependabotAlerts);
   }
-
-  issue_owner = 'asml-actions'
-  issue_repo = 'github-fork-updater'
+  issue_owner = "asml-actions";
+  issue_repo = "github-fork-updater";
   if (issueBody.length > 0) {
-    console.log(`Creating a new comment in issue [${issue_number}] in repo [${issue_owner}/${issue_repo}] to indicate status: [${issueBody}]`)
+    console.log(
+      `Creating a new comment in issue [${issue_number}] in repo [${issue_owner}/${issue_repo}] to indicate status: [${issueBody}]`
+    );
     // create an comment in the issue to indicate why a manual check is needed. uses different client!
     issue_octokit.rest.issues.createComment({
       owner: issue_owner,
       repo: issue_repo,
       issue_number,
-      body: issueBody
+      body: issueBody,
     });
-  }
-  else {
-    console.log(`No issues with the checks`)
+  } else {
+    console.log(`No issues with the checks`);
   }
 }
 
