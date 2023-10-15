@@ -116,8 +116,6 @@ function CheckAllReposInOrg {
     $reposWithUpdates = @()
 
     foreach ($repo in $repos) {
-        # add empty line for logs readability
-        Write-Host ""
         if ($repo.fork -and !$repo.archived -and !$repo.disabled) {
             Write-Host "Checking repository [$($repo.full_name)]"
             if ($repo.full_name -eq "rajbos/mutation-testing-elements") {
