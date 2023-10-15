@@ -27,7 +27,7 @@ function FindAllRepos {
     $url = "https://api.github.com/orgs/$orgName/repos?per_page=100"
     $info = CallWebRequest -url $url -userName $userName -PAT $PAT
 
-    $info.GetType()
+    Write-Host "info.GetType: [$($info.GetType())]"
     if ($info.GetType() -ne "System.Array")
     {
         Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
@@ -36,6 +36,7 @@ function FindAllRepos {
     }
 
     Write-Host "Found [$($info.Count)] repositories in [$orgName]"
+    Write-Host "info.GetType: [$($info.GetType())]"
     return $info
 }
 
