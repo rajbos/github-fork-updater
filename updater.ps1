@@ -27,10 +27,9 @@ function FindAllRepos {
     $url = "https://api.github.com/orgs/$orgName/repos?per_page=100"
     $info = CallWebRequest -url $url -userName $userName -PAT $PAT
 
-    if ($info -eq "https://docs.github.com/rest/reference/repos#list-organization-repositories"
-        -or
-        $info -eq "https://docs.github.com/rest/repos/repos#list-organization-repositories"
-       ) {
+    $info.GetType()
+    if ($info.GetType() -ne "System.Array")
+    {
         Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
         $url = "https://api.github.com/users/$orgName/repos"
         $info = CallWebRequest -url $url -userName $userName -PAT $PAT
