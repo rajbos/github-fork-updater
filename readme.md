@@ -47,7 +47,7 @@ After reviewing the changes in the parent repository, you can decide to pull in 
 Note: currently only the `default branch` will be updated, together with all Tags.
 
 ## Security 
-To be able to push the incoming changes into your fork we need a GitHub Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow, issues:write`. 
+To be able to push the incoming changes into your fork we need a GitHub Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow, actions: write, content: write, issues:write`. 
 `*` These scopes are set by default when the `workflows` scope is set
 
 There are two ways to create this token:
