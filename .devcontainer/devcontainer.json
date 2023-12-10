@@ -1,0 +1,10 @@
+{
+    "name": "PowerShell",
+    "image": "mcr.microsoft.com/powershell:latest",
+    "settings": { 
+        "terminal.integrated.shell.linux": "/usr/bin/pwsh"
+    },
+    "extensions": [
+        "ms-vscode.powershell"
+    ]
+}
