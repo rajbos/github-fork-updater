@@ -206,7 +206,7 @@ function CreateNewIssueForRepo {
     $data = [PSCustomObject]@{
         title = $title
         body = $body
-        labels = $labelsJson
+        labels = $labelsArray
     }
 
     Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"

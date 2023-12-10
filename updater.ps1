@@ -96,9 +96,7 @@ function CheckAllReposInOrg {
     foreach ($repo in $repos) {
         if ($repo.fork -and !$repo.archived -and !$repo.disabled) {
             Write-Host "Checking repository [$($repo.full_name)]"
-            if ($repo.full_name -eq "rajbos/mutation-testing-elements") {
-                Write-Host "Break here for testing"
-            }
+            
             $repoInfo = FindRepoOrigin -repoUrl $repo.url -userName $userName -PAT $PAT
             if ($repoInfo.updateAvailable -or $repoInfo.parentArchived) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
@@ -122,6 +120,9 @@ function CheckAllReposInOrg {
     }
 
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
+    if ($null -ne $env:GITHUB_STEP_SUMMARY) {
+        Write-Output "Found [$($reposWithUpdates.Count)] forks with available updates" >> $env:GITHUB_STEP_SUMMARY
+    }
     return $reposWithUpdates
 }
 
