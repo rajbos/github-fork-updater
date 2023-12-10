@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: 1 == 2 # the dockercommand needs to gets fixed and execute the test
 
     steps:
     - name: Checkout code
@@ -30,6 +31,9 @@ jobs:
           try {
             Write-Host "Running Pester tests inside the container"
             ls
+            cd workspace 
+            ls
+            cd ..
             Invoke-Pester -Path workspace
             Write-Host "Pester tests completed"	
           } catch {
@@ -56,9 +60,22 @@ jobs:
       run: |
         try {
           Write-Host "Running Pester tests"
-          Invoke-Pester -Path .
+          Invoke-Pester -Path . -OutputFormat NUnitXml -OutputFile TestResults.xml
           Write-Host "Pester tests completed"	
         } catch {
           Write-Host "Error: $_"
           exit 1
         }
+
+    - name: Set GITHUB_STEP_SUMMARY
+      run: |
+        [xml]$testResults = Get-Content -Path TestResults.xml
+
+        Write-Host $testResults
+
+        $markdownTableRows = $testResults.'test-results'.'test-suite'.results.'test-suite' | ForEach-Object {
+            "| $($_.name) | $($_.executed) | $($_.result) | $($_.success) |"
+        }
+        $markdownTableLines = $markdownTableRows -join "`n"
+        $markdownTable = "| Test Name | Executed | Result | Success |`n| --- | --- | --- | --- |`n $markdownTableLines"
+        echo "$markdownTable" >> $env:GITHUB_STEP_SUMMARY
