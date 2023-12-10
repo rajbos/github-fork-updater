@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [ main ]
 
-  push:
-    
   workflow_dispatch:
 
 jobs:
@@ -27,6 +25,7 @@ jobs:
         echo "Running the tests"	
         docker exec unittest-container pwsh -Command {
           try {
+            Write-Host "Running Pester tests inside the container"
             Invoke-Pester
           } catch {
             Write-Host "Error: $_"
