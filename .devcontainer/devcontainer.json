@@ -1,10 +1,11 @@
 {
     "name": "PowerShell",
-    "image": "mcr.microsoft.com/powershell:latest",
+    "image": "mcr.microsoft.com/vscode/devcontainers/universal:1.0",
     "settings": { 
         "terminal.integrated.shell.linux": "/usr/bin/pwsh"
     },
     "extensions": [
-        "ms-vscode.powershell"
+        "ms-vscode.powershell",
+        "GitHub.copilot"
     ]
 }
