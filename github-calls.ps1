@@ -200,10 +200,13 @@ function CreateNewIssueForRepo {
 
     $url = "https://api.github.com/repos/$issuesRepositoryName/issues"
 
+    $labelsArray = $labels -split ','
+    $labelsJson = $labelsArray | ConvertTo-Json
+
     $data = [PSCustomObject]@{
         title = $title
         body = $body
-        labels = "[$labels]"
+        labels = $labelsJson
     }
 
     Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
