@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: "'the dockercommand gets fixed' == 'done'"
+    if: 1 == 2 # the dockercommand needs to gets fixed and execute the test
 
     steps:
     - name: Checkout code
