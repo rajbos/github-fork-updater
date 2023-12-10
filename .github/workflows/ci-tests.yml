@@ -41,3 +41,21 @@ jobs:
     - name: Output Docker logs
       if: ${{ failure() }}
       run: docker logs unittest-container
+
+  test-direct:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Run Pester tests
+      run: |
+        try {
+          Write-Host "Running Pester tests"
+          Invoke-Pester -Path .
+          Write-Host "Pester tests completed"	
+        } catch {
+          Write-Host "Error: $_"
+          exit 1
+        }
