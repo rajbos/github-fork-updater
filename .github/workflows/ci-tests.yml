@@ -23,4 +23,13 @@ jobs:
       run: |
         # run the container with the source code mounted as a volume
         docker run --name unittest-container -v ${{ github.workspace }}:/workspace -d unittest-image
-        docker exec unittest-container pwsh -Command "Invoke-Pester"
+        
+        echo "Running the tests"	
+        docker exec unittest-container pwsh -Command {
+          try {
+            Invoke-Pester
+          } catch {
+            Write-Host "Error: $_"
+            exit 1
+          }
+        }
