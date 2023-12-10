@@ -21,5 +21,6 @@ jobs:
 
     - name: Run Pester tests in the container
       run: |
-        docker run --name unittest-container -d unittest-image
+        # run the container with the source code mounted as a volume
+        docker run --name unittest-container -v ${{ github.workspace }}:/workspace -d unittest-image
         docker exec unittest-container pwsh -Command "Invoke-Pester"
