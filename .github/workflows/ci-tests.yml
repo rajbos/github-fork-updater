@@ -30,6 +30,9 @@ jobs:
           try {
             Write-Host "Running Pester tests inside the container"
             ls
+            cd workspace 
+            ls
+            cd ..
             Invoke-Pester -Path workspace
             Write-Host "Pester tests completed"	
           } catch {
