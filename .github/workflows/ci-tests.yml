@@ -60,9 +60,18 @@ jobs:
       run: |
         try {
           Write-Host "Running Pester tests"
-          Invoke-Pester -Path .
+          Invoke-Pester -Path . -OutputFormat NUnitXml -OutputFile TestResults.xml
           Write-Host "Pester tests completed"	
         } catch {
           Write-Host "Error: $_"
           exit 1
         }
+
+    - name: Set GITHUB_STEP_SUMMARY
+      run: |
+        [xml]$testResults = Get-Content -Path TestResults.xml
+        $markdownTable = $testResults.'test-results'.test-suite.'results'.test-suite | ForEach-Object {
+            "| $($_.name) | $($_.executed) | $($_.result) | $($_.success) |"
+        } -join "`n"
+        $markdownTable = "| Test Name | Executed | Result | Success |`n| --- | --- | --- | --- |`n$markdownTable"
+        echo "$markdownTable" >> $GITHUB_STEP_SUMMARY
