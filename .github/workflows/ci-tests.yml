@@ -78,4 +78,4 @@ jobs:
         }
         $markdownTableLines = $markdownTableRows -join "`n"
         $markdownTable = "| Test Name | Executed | Result | Success |`n| --- | --- | --- | --- |`n $markdownTableLines"
-        echo "$markdownTable" >> $GITHUB_STEP_SUMMARY
+        echo "$markdownTable" >> $env:GITHUB_STEP_SUMMARY
