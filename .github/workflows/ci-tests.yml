@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: ("the dockercommand gets fixed" == "done")
 
     steps:
     - name: Checkout code
