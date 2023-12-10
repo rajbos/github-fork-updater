@@ -194,7 +194,8 @@ function CreateNewIssueForRepo {
         [string] $title,
         [string] $body,
         [string] $PAT,
-        [string] $userName
+        [string] $userName,
+        [string] $labels
     )
 
     $url = "https://api.github.com/repos/$issuesRepositoryName/issues"
@@ -202,6 +203,7 @@ function CreateNewIssueForRepo {
     $data = [PSCustomObject]@{
         title = $title
         body = $body
+        labels = "[$labels]"
     }
 
     Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
