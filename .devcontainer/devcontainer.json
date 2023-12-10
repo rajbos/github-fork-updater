@@ -9,9 +9,11 @@
         },
         "vscode": {
             "extensions": [
+                "github.vscode-github-actions",
                 "ms-azuretools.vscode-docker",
                 "ms-vscode.powershell",
-                "GitHub.copilot"
+                "GitHub.copilot",
+                "redhat.vscode-yaml"
             ]
         }
     }

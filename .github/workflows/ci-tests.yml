@@ -1,0 +1,64 @@
+name: Run Pester Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: docker build . -f .devcontainer/Dockerfile -t unittest-image
+
+    - name: Run Pester tests in the container
+      run: |
+        # run the container with the source code mounted as a volume
+        docker run --name unittest-container -v ${{ github.workspace }}:/workspace -d unittest-image
+        
+        echo "Running a test command"	
+        docker exec unittest-container pwsh -Command { Write-Host "Hi" }
+
+        echo "Running the tests"	
+        docker exec unittest-container pwsh -Command {
+          try {
+            Write-Host "Running Pester tests inside the container"
+            ls
+            Invoke-Pester -Path workspace
+            Write-Host "Pester tests completed"	
+          } catch {
+            Write-Host "Error: $_"
+            exit 1
+          }
+        }
+
+    - name: Output Docker logs
+      if: ${{ failure() }}
+      run: docker logs unittest-container
+
+  test-direct:
+    runs-on: ubuntu-latest
+    defaults:
+      run: 
+        shell: pwsh
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run Pester tests
+      run: |
+        try {
+          Write-Host "Running Pester tests"
+          Invoke-Pester -Path .
+          Write-Host "Pester tests completed"	
+        } catch {
+          Write-Host "Error: $_"
+          exit 1
+        }

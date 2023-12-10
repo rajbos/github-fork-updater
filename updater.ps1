@@ -13,32 +13,10 @@ param (
 
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
+. $PSScriptRoot\library.ps1
 
 # placeholder to enable testing locally
 $testingLocally = $false
-
-function FindAllRepos {
-    param (
-        [string] $orgName,
-        [string] $userName,
-        [string] $PAT
-    )
-
-    $url = "https://api.github.com/orgs/$orgName/repos?per_page=100"
-    $info = CallWebRequest -url $url -userName $userName -PAT $PAT
-
-    Write-Debug "info.GetType: [$($info.GetType())]"
-    if ($info.GetType() -ne "System.Object[]")
-    {
-        Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
-        $url = "https://api.github.com/users/$orgName/repos"
-        $info = CallWebRequest -url $url -userName $userName -PAT $PAT
-    }
-
-    Write-Host "Found [$($info.Count)] repositories in [$orgName]"
-    Write-Debug "info.GetType: [$($info.GetType())]"
-    return $info
-}
 
 function FindRepoOrigin {
     param (
