@@ -30,7 +30,7 @@ jobs:
           echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: |
        echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"

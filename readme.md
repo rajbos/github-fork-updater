@@ -20,7 +20,7 @@ Or follow these steps:
 1. Fork this repository to your own organization.
 1. Enable issue in the forked repository (issues are disabled on the fork by default, since you'd want any issues to be created on the parent repo, not the forked one).
 1. Enable the workflow `check-workflow.yml` and allow the schedule to run (GitHub security feature).
-1. Either add a repository secret named `PAT_GITHUB` containing a GitHub Personal Access Token with these scopes: `public_repo, read:org, read:user, repo:status, repo_deployment` (see below on why) or use a GitHub App with `GH_AUTOMATION_ID` and `GH_AUTOMATION_PRIVATE_KEY`. Read more info on the differences [here](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
+1. Either add a repository secret named `PAT_GITHUB` containing a GitHub Personal Access Token with these scopes: `public_repo, read:org, read:user, repo:status, repo_deployment, issues:write` (see below on why) or use a GitHub App with `GH_AUTOMATION_ID` and `GH_AUTOMATION_PRIVATE_KEY`. Read more info on the differences [here](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
 1. Add configuration for using a GitHub App or a PAT with the Actions variable in your repo called `USE_GITHUB_APP`, value is true or false.
 1. Trigger the `check-workflow.yml` workflow manually for the first run or wait for the schedule to run.
 1. Check the new issues on the forked repo for instructions on updating your forks.
@@ -47,11 +47,11 @@ After reviewing the changes in the parent repository, you can decide to pull in 
 Note: currently only the `default branch` will be updated, together with all Tags.
 
 ## Security 
-To be able to push the incoming changes into your fork we need a GitHub Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow`.  
+To be able to push the incoming changes into your fork we need a GitHub Access Token used in this workflow with the name `PAT_GITHUB`. This token needs to have the following scopes: `public_repo*, read:org, read:user, repo:status*, repo_deployment*, workflow, actions: write, content: write, issues:write`. 
 `*` These scopes are set by default when the `workflows` scope is set
 
 There are two ways to create this token:
-1. Use a GitHub App and get the token from it (Recommended)
+1. Use a GitHub App and get the token from it (Recommended), more info on these tokens [here](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
 1. Use a Personal Access Token (has to much rights and is a security risk)!
 
 You can read more information about this in this [blogpost](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).

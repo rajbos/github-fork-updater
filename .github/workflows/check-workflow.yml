@@ -36,7 +36,7 @@ jobs:
           echo "Using personal access token from secret 'PAT_GITHUB'"
         fi
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - id: update_step
       shell: pwsh

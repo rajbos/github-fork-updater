@@ -13,30 +13,10 @@ param (
 
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
+. $PSScriptRoot\library.ps1
 
 # placeholder to enable testing locally
 $testingLocally = $false
-
-function FindAllRepos {
-    param (
-        [string] $orgName,
-        [string] $userName,
-        [string] $PAT
-    )
-
-    $url = "https://api.github.com/orgs/$orgName/repos?per_page=100"
-    $info = CallWebRequest -url $url -userName $userName -PAT $PAT
-
-    if ($info -eq "https://docs.github.com/rest/reference/repos#list-organization-repositories") {
-        
-        Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
-        $url = "https://api.github.com/users/$orgName/repos"
-        $info = CallWebRequest -url $url -userName $userName -PAT $PAT
-    }
-
-    Write-Host "Found [$($info.Count)] repositories in [$orgName]"
-    return $info
-}
 
 function FindRepoOrigin {
     param (
@@ -114,13 +94,9 @@ function CheckAllReposInOrg {
     $reposWithUpdates = @()
 
     foreach ($repo in $repos) {
-        # add empty line for logs readability
-        Write-Host ""
         if ($repo.fork -and !$repo.archived -and !$repo.disabled) {
             Write-Host "Checking repository [$($repo.full_name)]"
-            if ($repo.full_name -eq "rajbos/mutation-testing-elements") {
-                Write-Host "Break here for testing"
-            }
+            
             $repoInfo = FindRepoOrigin -repoUrl $repo.url -userName $userName -PAT $PAT
             if ($repoInfo.updateAvailable -or $repoInfo.parentArchived) {
                 Write-Host "Found new updates in the parent repository [$($repoInfo.parentUrl)], compare the changes with [$($repoInfo.compareUrl)]"
@@ -144,6 +120,9 @@ function CheckAllReposInOrg {
     }
 
     Write-Host "Found [$($reposWithUpdates.Count)] forks with available updates"
+    if ($null -ne $env:GITHUB_STEP_SUMMARY) {
+        Write-Output "Found [$($reposWithUpdates.Count)] forks with available updates" >> $env:GITHUB_STEP_SUMMARY
+    }
     return $reposWithUpdates
 }
 
@@ -160,17 +139,20 @@ function CreateIssueFor {
     #Write-Host "- parentUrl $($repoInfo.parentUrl)"
     #Write-Host "- compareUrl $($repoInfo.compareUrl)"
 
+    $labels = ""
     if ($repoInfo.parentArchived) {
         $issueTitle = "Parent repository for [$($repoInfo.repoName)] is archived"
-        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** is archived. `r`n### Important!`r`nconsider revisiting the usage and find alternatives"
+        $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** is archived. `r`n### Important!`r`nConsider revisiting the usage and find alternatives.`r`nLeave this issue open or it will be recreated."
+        $labels = "parent-archived"
     } else {
         $body = "The parent repository for **[$($repoInfo.repoName)](https://github.com/$($repoInfo.repoName))** has updates available. `r`n### Important!`r`nClick on this [compare link]($($repoInfo.compareUrl)) to check the incoming changes before updating the fork. `r`n `r`n### To update the fork`r`nAdd the label **update-fork** to this issue to update the fork automatically."
         $issueTitle = "Parent repository for [$($repoInfo.repoName)] has updates available"
+        $labels = "update-available"
     }
     $existingIssueForRepo = $existingIssues | Where-Object {$_.title -eq $issueTitle}
 
     if ($null -eq $existingIssueForRepo) {
-        CreateNewIssueForRepo -repoInfo $repo -issuesRepositoryName $issuesRepository -title $issueTitle -body $body -PAT $PAT -userName $userName
+        CreateNewIssueForRepo -repoInfo $repo -issuesRepositoryName $issuesRepository -title $issueTitle -body $body -PAT $PAT -userName $userName -labels $labels
     } 
     else {
         # the issue already exists. Doesn't make sense to update the existing issue

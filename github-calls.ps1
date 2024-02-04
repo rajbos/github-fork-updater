@@ -43,8 +43,40 @@ function CallWebRequest {
         Write-Host "  RateLimit-Remaining: $($result.Headers["X-RateLimit-Remaining"])"
         Write-Host "  RateLimit-Reset: $($result.Headers["X-RateLimit-Reset"])"
         Write-Host "  RateLimit-Used: $($result.Headers["x-ratelimit-used"])"
+
         # convert the response json content
         $info = ($result.Content | ConvertFrom-Json)
+
+        if ($result.Headers["Link"]) {
+            Write-Debug "Found pagination link: $($result.Headers["Link"])"
+            # load next link from header
+
+            $result.Headers["Link"].Split(',') | ForEach-Object {
+                # search for the 'next' link in this list
+                $link = $_.Split(';')[0].Trim()
+                if ($_.Split(';')[1].Contains("next")) {
+                    $nextUrl = $link.Substring(1, $link.Length - 2)
+
+                    # $currentResultCount = $currentResultCount + $info.Count
+                    # if ($maxResultCount -ne 0) {
+                    #     Write-Host "Loading next page of data, where at [$($currentResultCount)] of max [$maxResultCount]"
+                    # }
+                    # # and get the results
+                    # if ($maxResultCount -ne 0) {
+                    #     # check if we need to stop getting more pages
+                    #     if ($currentResultCount -gt $maxResultCount) {
+                    #         Write-Host "Stopping with [$($currentResultCount)] results, which is more then the max result count [$maxResultCount]"
+                    #         return $response
+                    #     }
+                    # }
+
+                    # continue fetching next page
+                    $nextResult = CallWebRequest -url $nextUrl -userName $userName -PAT $PAT -verbToUse $verbToUse -body $body
+                    $info += $nextResult
+                }
+            }
+        }
+
     }
     catch {
         Write-Host "Error calling api at [$url]:"
@@ -162,14 +194,19 @@ function CreateNewIssueForRepo {
         [string] $title,
         [string] $body,
         [string] $PAT,
-        [string] $userName
+        [string] $userName,
+        [string] $labels
     )
 
     $url = "https://api.github.com/repos/$issuesRepositoryName/issues"
 
+    $labelsArray = $labels -split ','
+    $labelsJson = $labelsArray | ConvertTo-Json
+
     $data = [PSCustomObject]@{
         title = $title
         body = $body
+        labels = $labelsArray
     }
 
     Write-Host "Creating a new issue with title [$title] in repository [$issuesRepositoryName]"
