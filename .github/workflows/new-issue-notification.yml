@@ -9,7 +9,7 @@ jobs:
     if: ${{ vars.SEND_NOTIFICATION == 'true' }}
     runs-on: ubuntu-latest
     steps: 
-    - uses: peter-murray/workflow-application-token-action@b1ad34e28f4ef30582df1bd5f45df2044eb7a6b9 # v2.1.0
+    - uses: peter-murray/workflow-application-token-action@dc0413987a085fa17d19df9e47d4677cf81ffef3 # v2.1.0
       if: ${{ vars.use_github_app == 'true' }}
       id: get-workflow-token
       with:
