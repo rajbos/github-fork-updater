@@ -56,3 +56,12 @@ There are two ways to create this token:
 
 You can read more information about this in this [blogpost](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
 
+### GitHub App security scopes
+To use a GitHub App, create a repository variable called `use_github_app` and set its value to `true`. Then create an app with the following security scopes and install it at the org level with the repositories you want to handle updates for.
+
+** Scopes **
+- Actions: read & write (needed to be able to update files in the .github/workflows folder)
+- Contents: read & write (needed to be able to update the repo contents)
+- Issues: read & write (needed to create and close the issues to be able to notify you of updates)
+- Metadata: read only (default setting)
+
