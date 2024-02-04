@@ -79,12 +79,14 @@ function CallWebRequest {
 
     }
     catch {
-        Write-Host "Error calling api at [$url]:"
+        Write-Host "Error calling api at [$url]: $($_.Exception)"
         Write-Host "  StatusCode: $($_.Exception.Response.StatusCode)"
-        Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
-        Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
-        Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
-        Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
+        if ($_.Exception.Response.Headers) {
+            Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
+            Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
+            Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
+            Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
+        }
 
         $messageData = $_.ErrorDetails.Message | ConvertFrom-Json
         Write-Host "$($_.ErrorDetails.Message)"
