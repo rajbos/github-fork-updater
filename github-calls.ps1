@@ -36,7 +36,7 @@ function CallWebRequest {
     try {
 
         $bodyContent = ($body | ConvertTo-Json) -replace '\\', '\'
-        $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method $verbToUse -Body $bodyContent -ErrorAction Stop
+        $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method $verbToUse -Body $bodyContent -ErrorAction Stop -ContentType "application/json"
         
         Write-Host "  StatusCode: $($result.StatusCode)"
         Write-Host "  RateLimit-Limit: $($result.Headers["X-RateLimit-Limit"])"
@@ -79,12 +79,14 @@ function CallWebRequest {
 
     }
     catch {
-        Write-Host "Error calling api at [$url]:"
+        Write-Host "Error calling api at [$url]: $($_.Exception)"
         Write-Host "  StatusCode: $($_.Exception.Response.StatusCode)"
-        Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
-        Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
-        Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
-        Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
+        if ($_.Exception.Response.Headers) {
+            Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
+            Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
+            Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
+            Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
+        }
 
         $messageData = $_.ErrorDetails.Message | ConvertFrom-Json
         Write-Host "$($_.ErrorDetails.Message)"
