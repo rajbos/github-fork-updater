@@ -63,5 +63,6 @@ To use a GitHub App, create a repository variable called `use_github_app` and se
 - Actions: read & write (needed to be able to update files in the .github/workflows folder)
 - Contents: read & write (needed to be able to update the repo contents)
 - Issues: read & write (needed to create and close the issues to be able to notify you of updates)
+- Workflows: read & write (needed to be able to update workflows)
 - Metadata: read only (default setting)
 
