@@ -1,5 +1,3 @@
-
-
 # example calls:
 # .\update-fork.ps1 -orgName "rajbos-actions" -userName "xxx" -PAT $env:GitHubPAT $issueTitle "Parent repository for [rajbos/azure-docs] has updates available"
 
@@ -38,7 +36,7 @@ function UpdateFork {
     )
 
     $forkUrl = GetForkCloneUrl -fork $fork -PAT $PAT
-    
+
     # set user settings
     git config --global user.email "noreply@githubupdater.com"
     git config --global user.name "GitHub Fork Updater"
@@ -91,7 +89,7 @@ function Main {
     )
 
     Write-Host "Starting the update for issue with title [$issueTitle] having number [$issueId] on repository [$issuesRepository] and a PAT that has length [$($PAT.Length)]"
-    
+
     $workflowRunUrl = "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)/actions/runs/$($env:GITHUB_RUN_ID)"
     Write-Host "Found workflowRunUrl: [$workflowRunUrl]"
 
@@ -100,7 +98,7 @@ function Main {
     $forkResult = UpdateFork -fork $fork -PAT $PAT
     if ($forkResult -eq 1) {
         Write-Host "Error with the update of the fork, halting execution"
-        AddCommentToIssue -number $issueId -message ":alert: Found merge conflicts, aborting the update" -repoName $issuesRepository -PAT $PAT
+        AddCommentToIssue -number $issueId -message ":warning: Found merge conflicts, aborting the update" -repoName $issuesRepository -PAT $PAT
         return 1
     }
 
@@ -110,7 +108,7 @@ function Main {
 
     # make sure we are back where we started (for easier local testing)
     Set-Location $PSScriptRoot
-    
+
     AddCommentToIssue -number $issueId -message "Fork has been updated" -repoName $issuesRepository -PAT $PAT
     CloseIssue -number $issueId -issuesRepositoryName $issuesRepository -PAT $PAT
 }
