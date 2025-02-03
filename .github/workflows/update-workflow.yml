@@ -11,7 +11,7 @@ jobs:
       contents: write
       actions: write
     steps:
-    - uses: peter-murray/workflow-application-token-action@8e4e6fbf6fcc8a272781d97597969d21b3812974 # v2.1.0
+    - uses: peter-murray/workflow-application-token-action@d17e3a9a36850ea89f35db16c1067dd2b68ee343 # v2.1.0
       if: ${{ vars.use_github_app == 'true' }}
       id: get-workflow-token
       with:
