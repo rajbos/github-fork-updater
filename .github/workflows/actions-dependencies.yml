@@ -1,0 +1,19 @@
+name: Actions Dependencies
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  submit-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jessehouwing/actions-dependency-submission@v0.0.1
+        with:
+          token: ${{ secrets.token }}
