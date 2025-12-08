@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/powershell:7.3-alpine-3.17@sha256:cfe59bc837a0194647734278b9a31ba0078849c4386fb141406bc711cc040329
+FROM mcr.microsoft.com/powershell:7.5-alpine-3.20@sha256:a6beeddb2fcf45547c9099fba091ce231e51aa374fe62ecc182f7c28b69a6cbf
 
 # add git
 RUN apk add --no-cache git
