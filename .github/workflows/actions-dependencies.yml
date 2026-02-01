@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.1
 
-      - uses: jessehouwing/actions-dependency-submission@v1.0.7
+      - uses: jessehouwing/actions-dependency-submission@v1.0.8
         with:
           token: ${{ secrets.token }}
