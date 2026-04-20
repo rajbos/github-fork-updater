@@ -41,10 +41,19 @@ jobs:
 
     - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v6.0.1
 
-    - run: |
-       echo "Found the issue that triggered this event with number [${{ github.event.issue.number }}]"
-       echo "Found the issue title [${{ github.event.issue.title }}]"
+    - env:
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+        ISSUE_TITLE: ${{ github.event.issue.title }}
+      run: |
+       echo "Found the issue that triggered this event with number [$ISSUE_NUMBER]"
+       echo "Found the issue title [$ISSUE_TITLE]"
 
-    - run: |
-       .\update-fork.ps1 -orgName ${{ github.repository_owner }} -userName "xxx" -PAT ${{ steps.get-token.outputs.token }} -issueTitle "${{ github.event.issue.title }}" -issueId ${{ github.event.issue.number }} -issuesRepository  ${{ github.repository }}
+    - env:
+        ORG_NAME: ${{ github.repository_owner }}
+        ISSUE_TITLE: ${{ github.event.issue.title }}
+        ISSUE_ID: ${{ github.event.issue.number }}
+        ISSUES_REPOSITORY: ${{ github.repository }}
+        PAT: ${{ steps.get-token.outputs.token }}
+      run: |
+       .\update-fork.ps1 -orgName $env:ORG_NAME -userName "xxx" -PAT $env:PAT -issueTitle "$env:ISSUE_TITLE" -issueId $env:ISSUE_ID -issuesRepository $env:ISSUES_REPOSITORY
       shell: pwsh
