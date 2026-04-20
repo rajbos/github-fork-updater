@@ -1,0 +1,43 @@
+name: PSScriptAnalyzer
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '30 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  psscriptanalyzer:
+    name: PSScriptAnalyzer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v6.0.1
+
+      - name: Run PSScriptAnalyzer
+        uses: microsoft/psscriptanalyzer-action@6b2948b1944407914a58661c49941824d149734f # v1.1
+        with:
+          path: ./
+          recurse: true
+          output: results.sarif
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        if: always()
+        with:
+          sarif_file: results.sarif
