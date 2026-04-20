@@ -2,12 +2,16 @@ name: Send notification on new issue
 on:
   issues:
     types: [opened]
-    
+
+permissions: {}
+
 jobs:
   # tag the team from the variables on any new issues created in this repo
   tag-a-user:
     if: ${{ vars.SEND_NOTIFICATION == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps: 
     - name: Harden the runner (Audit all outbound calls)
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
