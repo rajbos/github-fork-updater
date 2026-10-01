@@ -18,6 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: jessehouwing/actions-dependency-submission@d4ed9fd03b1c91e31a62d9a4095440128ec1316b # v1.0.15
+      - uses: jessehouwing/actions-dependency-submission@aa358ec7aee0a7f2dbaef9702915b28e90879842 # v1.0.17
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
